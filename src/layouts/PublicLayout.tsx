@@ -1,5 +1,5 @@
 import { Search } from "lucide-react";
-import { FormEvent, useMemo, useState } from "react";
+import { FormEvent, useState } from "react";
 import { Link, NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { FloatingContact } from "../components/FloatingContact";
 import { Loading } from "../components/Loading";
@@ -34,10 +34,15 @@ export function PublicLayout() {
   const [query, setQuery] = useState("");
   const site = settingValue<SiteSetting>(navigation.data?.settings, "site", fallbackSite);
   const offices = settingValue<Office[]>(navigation.data?.settings, "offices", []);
-  const menuItems = useMemo(() => {
-    const header = navigation.data?.menus.find((menu) => menu.location === "header");
-    return header?.items.sort((a, b) => a.order - b.order) ?? [];
-  }, [navigation.data?.menus]);
+  const menuItems = [
+    { label: "Trang chủ", href: "/" },
+    { label: "Tin tức", href: "/tin-tuc" },
+    { label: "Biểu mẫu", href: "/bieu-mau" },
+    { label: "Hỏi đáp", href: "/hoi-dap" },
+    { label: "Ly hôn", href: "/ly-hon" },
+    { label: "Đất đai", href: "/dat-dai" },
+    { label: "Thừa kế", href: "/thua-ke" }
+  ];
 
   function handleSearch(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -78,7 +83,7 @@ export function PublicLayout() {
                           }
                         }}
                         className={({ isActive }) =>
-                          `text-[1rem] transition-colors ${
+                          `whitespace-nowrap text-[0.92rem] transition-colors ${
                             isActive ? "font-bold text-[#282973]" : "font-medium text-slate-800 hover:text-primary"
                           }`
                         }
