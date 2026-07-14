@@ -236,7 +236,7 @@ export function CategoryPage() {
   const thumbnails = useMemo(() => feature.slice(1, 4), [feature]);
   const headlines = useMemo(() => feature.slice(4, 11), [feature]);
 
-  if (category.isLoading) return <Loading />;
+  if (category.isLoading) return <Loading variant="page" />;
   if (category.isError || !category.data) return <ErrorState title="Không tìm thấy chuyên mục" />;
 
   const title = copy?.title ?? category.data.name;

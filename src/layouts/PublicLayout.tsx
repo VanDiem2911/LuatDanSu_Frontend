@@ -137,7 +137,7 @@ export function PublicLayout() {
         </div>
       </header>
 
-      {navigation.isLoading ? <Loading label="Đang tải website" /> : <Outlet context={navigation.data} />}
+      {navigation.isLoading ? <Loading label="Đang tải website" variant="page" /> : <Outlet context={navigation.data} />}
 
       <footer className="border-t border-slate-200 bg-white pb-8 pt-10 text-slate-600">
         <div className="container-page">

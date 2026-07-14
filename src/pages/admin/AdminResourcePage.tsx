@@ -457,7 +457,7 @@ export function AdminResourcePage() {
 
       <div className="mt-6 overflow-x-auto border border-slate-200 bg-white shadow-sm">
         {query.isLoading ? (
-          <Loading />
+          <Loading variant="table" />
         ) : query.isError ? (
           <ErrorState />
         ) : (

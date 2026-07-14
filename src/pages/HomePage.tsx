@@ -365,7 +365,7 @@ export function HomePage() {
         </div>
 
         {homeTopic.isLoading ? (
-          <Loading label="Đang tải dữ liệu" />
+          <Loading label="Đang tải dữ liệu" variant="hero" />
         ) : homeTopic.isError || !leadArticle ? (
           <ErrorState />
         ) : (
@@ -384,7 +384,7 @@ export function HomePage() {
         <section className="py-10">
           <SectionHeading title="Biểu mẫu" href="/bieu-mau" linkLabel="Xem tất cả biểu mẫu" />
           {forms.isLoading ? (
-            <Loading />
+            <Loading variant="cards" />
           ) : forms.isError ? (
             <ErrorState />
           ) : (

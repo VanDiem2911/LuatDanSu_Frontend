@@ -41,7 +41,7 @@ export function Sidebar({ categories }: { categories: Category[] }) {
         </h2>
         <div className="mt-3">
           {popular.isLoading ? (
-            <Loading label="Đang tải bài viết" />
+            <Loading label="Đang tải bài viết" variant="compact" />
           ) : (
             popular.data?.data.map((article) => <ArticleCard key={article._id} article={article} compact />)
           )}

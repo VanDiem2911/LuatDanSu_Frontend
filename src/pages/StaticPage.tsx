@@ -8,7 +8,7 @@ import { getPage } from "../services/cms";
 export function StaticPage({ slug }: { slug: string }) {
   const page = useQuery({ queryKey: ["page", slug], queryFn: () => getPage(slug) });
 
-  if (page.isLoading) return <Loading />;
+  if (page.isLoading) return <Loading variant="article" />;
   if (page.isError || !page.data) return <ErrorState title="Không tìm thấy trang" />;
 
   return (

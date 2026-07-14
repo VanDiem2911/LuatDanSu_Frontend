@@ -24,7 +24,7 @@ export function SearchPage() {
         <h1 className="mb-6 text-4xl font-bold text-ink">Tìm kiếm</h1>
         <p className="mb-8 text-slate-500">Kết quả cho từ khóa: <strong>{q}</strong></p>
         {articles.isLoading ? (
-          <Loading />
+          <Loading variant="cards" />
         ) : articles.isError ? (
           <ErrorState />
         ) : (

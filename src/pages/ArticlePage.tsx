@@ -15,7 +15,7 @@ export function ArticlePage() {
   const navigation = useOutletContext<NavigationPayload>();
   const article = useQuery({ queryKey: ["article", articleSlug], queryFn: () => getArticle(articleSlug) });
 
-  if (article.isLoading) return <Loading />;
+  if (article.isLoading) return <Loading variant="article" />;
   if (article.isError || !article.data) return <ErrorState title="Không tìm thấy bài viết" />;
 
   const category = navigation.categories.find((item) => item.slug === article.data.categorySlug);
