@@ -1,6 +1,6 @@
 import { Search } from "lucide-react";
 import { FormEvent, useState } from "react";
-import { Link, NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
+import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { FloatingContact } from "../components/FloatingContact";
 import { useNavigation } from "../hooks/useNavigation";
 import type { NavigationPayload } from "../types/api";
@@ -72,18 +72,13 @@ export function PublicLayout() {
       <header className="sticky top-0 z-[100] w-full border-b border-slate-200 bg-white py-4">
         <div className="container-page">
           <div className="flex flex-row items-center justify-between gap-4">
-            <Link
-              to="/"
-              onClick={() => {
-                if (location.pathname === "/") {
-                  window.scrollTo({ top: 0, behavior: "smooth" });
-                }
-              }}
+            <a
+              href="/"
               className="flex flex-shrink-0 items-center"
               aria-label={site.logoText}
             >
               <img src="/logo.png" alt={site.logoText} className="h-12 w-auto object-contain" />
-            </Link>
+            </a>
             <div className="flex flex-row items-center gap-5">
               <nav className="hidden lg:block">
                 <ul className="m-0 flex list-none items-center gap-7 p-0">
