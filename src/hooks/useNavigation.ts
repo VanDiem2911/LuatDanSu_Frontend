@@ -4,6 +4,7 @@ import { getNavigation } from "../services/cms";
 export function useNavigation() {
   return useQuery({
     queryKey: ["navigation"],
-    queryFn: getNavigation
+    queryFn: getNavigation,
+    staleTime: 10 * 60_000
   });
 }

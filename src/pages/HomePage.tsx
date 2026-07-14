@@ -9,7 +9,7 @@ import { Loading } from "../components/Loading";
 import { Seo } from "../components/Seo";
 import { Sidebar } from "../components/Sidebar";
 import { ConsultBanner } from "../components/ConsultBanner";
-import { getArticles, getBanners, getVideos, submitLead } from "../services/cms";
+import { getArticles, getVideos, submitLead } from "../services/cms";
 import type { Article, Category, NavigationPayload, Video } from "../types/api";
 import { formatDate } from "../utils/format";
 import { isValidPhone, PATTERNS, VALIDATION_MESSAGES } from "../utils/validation";
@@ -334,7 +334,6 @@ export function HomePage() {
     queryKey: ["videos", "home"],
     queryFn: () => getVideos({ limit: 100, sort: "order", order: "asc" })
   });
-  const banner = useQuery({ queryKey: ["banners", "home"], queryFn: () => getBanners({ limit: 1 }) });
 
   const topicArticles = homeTopic.data?.data ?? [];
   const leadArticle = useMemo(
@@ -349,7 +348,6 @@ export function HomePage() {
   const thumbnailArticles = useMemo(() => remainingTopicArticles.slice(1, 4), [remainingTopicArticles]);
   const newsArticles = useMemo(() => topicArticles.slice(0, 6), [topicArticles]);
   const questionArticles = questions.data?.data ?? [];
-  const consultationImage = banner.data?.data[0]?.image ?? leadArticle?.image;
 
   return (
     <>
@@ -375,7 +373,7 @@ export function HomePage() {
               <ThumbnailStrip articles={thumbnailArticles} categories={navigation.categories} />
             </div>
             <ShortArticleList articles={headlineArticles} categories={navigation.categories} />
-            <ConsultationCard image={consultationImage} />
+            <ConsultationCard />
           </section>
         )}
 
@@ -415,7 +413,7 @@ export function HomePage() {
         <QuestionRows articles={questionArticles} categories={navigation.categories} />
       </main>
 
-      <ConsultBanner image={consultationImage} />
+      <ConsultBanner />
     </>
   );
 }

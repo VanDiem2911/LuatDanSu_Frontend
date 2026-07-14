@@ -2,8 +2,8 @@ import { Search } from "lucide-react";
 import { FormEvent, useState } from "react";
 import { Link, NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { FloatingContact } from "../components/FloatingContact";
-import { Loading } from "../components/Loading";
 import { useNavigation } from "../hooks/useNavigation";
+import type { NavigationPayload } from "../types/api";
 import { settingValue } from "../utils/format";
 
 type SiteSetting = {
@@ -27,13 +27,27 @@ const fallbackSite: SiteSetting = {
   logoText: "Luật Dân Sự"
 };
 
+const fallbackNavigation: NavigationPayload = {
+  menus: [],
+  settings: [],
+  categories: [
+    { _id: "tin-tuc", name: "Tin tức pháp luật", slug: "tin-tuc", type: "category", order: 1, isVisible: true },
+    { _id: "bieu-mau", name: "Biểu mẫu pháp luật", slug: "bieu-mau", type: "category", order: 2, isVisible: true },
+    { _id: "hoi-dap", name: "Hỏi đáp pháp luật", slug: "hoi-dap", type: "category", order: 3, isVisible: true },
+    { _id: "ly-hon", name: "Hôn nhân & Gia đình", slug: "ly-hon", type: "specialty", order: 4, isVisible: true },
+    { _id: "dat-dai", name: "Pháp luật Đất đai", slug: "dat-dai", type: "specialty", order: 5, isVisible: true },
+    { _id: "thua-ke", name: "Thừa kế & Di sản", slug: "thua-ke", type: "specialty", order: 6, isVisible: true }
+  ]
+};
+
 export function PublicLayout() {
   const navigation = useNavigation();
   const navigate = useNavigate();
   const location = useLocation();
   const [query, setQuery] = useState("");
-  const site = settingValue<SiteSetting>(navigation.data?.settings, "site", fallbackSite);
-  const offices = settingValue<Office[]>(navigation.data?.settings, "offices", []);
+  const navigationData = navigation.data ?? fallbackNavigation;
+  const site = settingValue<SiteSetting>(navigationData.settings, "site", fallbackSite);
+  const offices = settingValue<Office[]>(navigationData.settings, "offices", []);
   const menuItems = [
     { label: "Trang chủ", href: "/" },
     { label: "Tin tức", href: "/tin-tuc" },
@@ -137,7 +151,12 @@ export function PublicLayout() {
         </div>
       </header>
 
-      {navigation.isLoading ? <Loading label="Đang tải website" variant="page" /> : <Outlet context={navigation.data} />}
+      {navigation.isFetching ? (
+        <div className="fixed left-0 right-0 top-0 z-[120] h-1 overflow-hidden bg-primary/10" aria-hidden="true">
+          <span className="navigation-progress block h-full w-1/3 bg-primary" />
+        </div>
+      ) : null}
+      <Outlet context={navigationData} />
 
       <footer className="border-t border-slate-200 bg-white pb-8 pt-10 text-slate-600">
         <div className="container-page">

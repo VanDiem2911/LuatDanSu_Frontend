@@ -3,10 +3,7 @@ import { toast } from "sonner";
 import { submitLead } from "../services/cms";
 import { isValidPhone, PATTERNS, VALIDATION_MESSAGES } from "../utils/validation";
 
-const fallbackImage =
-  "https://www.qeh.ox.ac.uk/sites/default/files/styles/paragraph_image/public/2025-08/law-blog_shutterstock_2115451628.jpg?itok=B-GlzEQu";
-
-export function ConsultBanner({ image = fallbackImage }: { image?: string }) {
+export function ConsultBanner() {
   const [phone, setPhone] = useState("");
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -23,12 +20,14 @@ export function ConsultBanner({ image = fallbackImage }: { image?: string }) {
 
   return (
     <section className="pt-0">
-      <div className="relative h-64 overflow-hidden">
-        <div
-          className="absolute inset-0 z-0 scale-x-[-1] bg-cover bg-center"
-          style={{ backgroundImage: `url("${image}")` }}
+      <div className="relative h-56 overflow-hidden sm:h-64">
+        <img
+          src="/consult-banner.jpg"
+          alt=""
+          aria-hidden="true"
+          className="absolute inset-0 z-0 h-full w-full scale-x-[-1] object-cover object-[center_42%]"
         />
-        <div className="absolute inset-0 z-10 bg-white/20" />
+        <div className="absolute inset-0 z-10 bg-white/10" />
         <div className="container-page relative z-20 flex h-full flex-col items-center justify-center gap-3 px-4 text-center sm:items-end sm:text-right sm:px-10">
           <p className="text-[1.1rem] font-medium leading-tight text-navy">
             Kết nối Luật sư ngay để bảo vệ quyền lợi của bạn

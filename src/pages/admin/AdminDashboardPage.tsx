@@ -1,51 +1,85 @@
 import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
 import { Activity, Database, FileText, MessageSquare, PhoneCall } from "lucide-react";
 import { Link } from "react-router-dom";
-import { listAdminResource } from "../../services/cms";
+import JSZip from "jszip";
+import { getAdminDashboard, getBackupData } from "../../services/cms";
 
 const stats = [
   { resource: "articles", label: "Bài viết mới", icon: FileText },
   { resource: "leads", label: "SĐT gửi trong tháng", icon: PhoneCall },
   { resource: "comments", label: "Câu hỏi mới", icon: MessageSquare },
   { resource: "videos", label: "Video tư vấn", icon: Activity }
-];
+] as const;
 
 const chart = [920, 1480, 1710, 2180, 2700, 2920, 3320, 3860, 4140, 4520, 5070, 5380, 5730, 6280, 6735];
 const previousChart = [760, 1040, 1210, 1660, 1890, 2040, 2470, 2890, 3090, 3410, 3790, 3940, 4310, 4720, 5030];
 
 export function AdminDashboardPage() {
-  const queries = stats.map((card) =>
-    useQuery({
-      queryKey: ["admin-count", card.resource],
-      queryFn: () => listAdminResource(card.resource, { limit: 1 })
-    })
-  );
+  const [isBackingUp, setIsBackingUp] = useState(false);
 
-  const leads = useQuery({
-    queryKey: ["admin-dashboard-leads"],
-    queryFn: () => listAdminResource("leads", { limit: 5, sort: "createdAt", order: "desc" })
+  const dashboard = useQuery({
+    queryKey: ["admin-dashboard"],
+    queryFn: getAdminDashboard,
+    staleTime: 30_000
   });
+
+  async function handleBackupClick() {
+    if (isBackingUp) return;
+    try {
+      setIsBackingUp(true);
+      const data = await getBackupData();
+      
+      const zip = new JSZip();
+      for (const [collectionName, documents] of Object.entries(data)) {
+        zip.file(`${collectionName}.json`, JSON.stringify(documents, null, 2));
+      }
+      
+      const blob = await zip.generateAsync({ type: "blob" });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      const dateStr = new Date().toISOString().split("T")[0];
+      link.href = url;
+      link.setAttribute("download", `luatdansu_backup_${dateStr}.zip`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Backup failed:", error);
+      alert("Sao lưu dữ liệu thất bại!");
+    } finally {
+      setIsBackingUp(false);
+    }
+  }
 
   return (
     <div>
       <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
         <h1 className="section-title text-[1.7rem]">Dashboard thống kê</h1>
-        <button className="inline-flex items-center gap-3 rounded-full border border-slate-200 bg-white px-8 py-4 text-base font-black text-slate-700 shadow-sm">
-          <Database className="h-5 w-5 text-primary" />
-          Sao lưu dữ liệu
+        <button
+          onClick={handleBackupClick}
+          disabled={isBackingUp}
+          className={`inline-flex items-center gap-3 rounded-full border border-slate-200 bg-white px-8 py-4 text-base font-black text-slate-700 shadow-sm transition hover:bg-slate-50 active:scale-95 ${
+            isBackingUp ? "opacity-50 cursor-not-allowed" : ""
+          }`}
+        >
+          <Database className={`h-5 w-5 text-primary ${isBackingUp ? "animate-bounce" : ""}`} />
+          {isBackingUp ? "Đang sao lưu..." : "Sao lưu dữ liệu"}
         </button>
       </div>
 
       <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
-        {stats.map((card, index) => {
+        {stats.map((card) => {
           const Icon = card.icon;
-          const query = queries[index];
           return (
             <div key={card.resource} className="rounded-xl border border-slate-200 bg-white p-8 shadow-sm">
               <div className="flex items-start justify-between gap-4">
                 <div>
                   <p className="text-base font-semibold text-slate-500">{card.label}</p>
-                  <p className="mt-6 text-4xl font-black text-navy">{query.isLoading ? "..." : query.data?.meta.total ?? 0}</p>
+                  <p className="mt-6 text-4xl font-black text-navy">
+                    {dashboard.isLoading ? "..." : dashboard.data?.counts[card.resource] ?? 0}
+                  </p>
                   <p className="mt-2 text-lg font-black text-emerald-500">0% ↗</p>
                 </div>
                 <span className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary">
@@ -168,26 +202,26 @@ export function AdminDashboardPage() {
         </section>
 
         <section className="flex min-h-[430px] flex-col border border-slate-200 bg-white p-8">
-          <h2 className="section-title text-[1.35rem]">SĐT tư vấn mới</h2>
-          <div className="mt-8 flex flex-1 flex-col justify-center">
-            {leads.data?.data.length ? (
-              <div className="divide-y divide-slate-100">
-                {leads.data.data.map((lead) => (
-                  <div key={String(lead._id)} className="py-3">
-                    <p className="font-black text-slate-800">{String(lead.phone ?? "")}</p>
-                    <p className="line-clamp-1 text-sm font-medium text-slate-500">
-                      Nguồn: {String(lead.source ?? "website")} - Trạng thái: {String(lead.status ?? "new")}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <p className="text-center text-xl font-medium text-slate-400">Không có dữ liệu mới</p>
-            )}
-          </div>
-          <Link to="/admin/leads" className="mt-6 inline-flex items-center justify-center gap-2 text-sm font-black text-primary">
-            Xem tất cả <span>›</span>
-          </Link>
+            <h2 className="section-title text-[1.35rem]">SĐT tư vấn mới</h2>
+            <div className={`mt-8 flex flex-1 flex-col ${dashboard.data?.recentLeads.length ? "" : "justify-center"}`}>
+              {dashboard.data?.recentLeads.length ? (
+                <div className="divide-y divide-slate-100">
+                  {dashboard.data.recentLeads.map((lead) => (
+                    <div key={String(lead._id)} className="py-3">
+                      <p className="font-black text-slate-800">{String(lead.phone ?? "")}</p>
+                      <p className="line-clamp-1 text-sm font-medium text-slate-500">
+                        Nguồn: {String(lead.source ?? "website")} - Trạng thái: {String(lead.status ?? "new")}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-center text-xl font-medium text-slate-400">Không có dữ liệu mới</p>
+              )}
+            </div>
+            <Link to="/admin/leads" className="mt-6 inline-flex items-center justify-center gap-2 text-sm font-black text-primary">
+              Xem tất cả <span>›</span>
+            </Link>
         </section>
       </div>
     </div>

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import {
+  ArrowLeft,
   BarChart3,
   FileQuestion,
   FileText,
@@ -93,7 +94,14 @@ export function AdminLayout() {
           <span className="hidden sm:inline text-xl md:text-2xl font-black uppercase text-slate-800">
             Hệ thống quản lý
           </span>
-          <div className="ml-auto mr-4 md:mr-8 flex items-center gap-2 md:gap-4">
+          <Link
+            to="/"
+            className="ml-auto inline-flex items-center gap-2 rounded-md border border-slate-200 bg-white px-3 py-2 text-sm font-bold text-primary transition hover:border-primary hover:bg-primary/5 md:px-4"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            <span className="hidden md:inline">Quay về trang web</span>
+          </Link>
+          <div className="ml-3 mr-4 flex items-center gap-2 md:ml-5 md:mr-8 md:gap-4">
             <span className="flex h-9 w-9 md:h-11 md:w-11 items-center justify-center rounded-full bg-primary/10 text-primary">
               <UserRound className="h-4 w-4 md:h-5 md:w-5" />
             </span>

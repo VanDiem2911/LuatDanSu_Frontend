@@ -8,7 +8,7 @@ import { ErrorState } from "../components/ErrorState";
 import { Loading } from "../components/Loading";
 import { Seo } from "../components/Seo";
 import { Sidebar } from "../components/Sidebar";
-import { getArticles, getBanners, getCategory } from "../services/cms";
+import { getArticles, getCategory } from "../services/cms";
 import type { Article, Category, NavigationPayload } from "../types/api";
 
 const headingCopy: Record<string, { title: string; description: string }> = {
@@ -224,9 +224,9 @@ export function CategoryPage() {
   const articles = useQuery({
     queryKey: ["articles", categorySlug, "list", page],
     queryFn: () => getArticles({ categorySlug, page, limit: 9, sort: "publishedAt", order: "desc" }),
-    enabled: Boolean(categorySlug)
+    enabled: Boolean(categorySlug),
+    placeholderData: (previousData) => previousData
   });
-  const banner = useQuery({ queryKey: ["banners", "category"], queryFn: () => getBanners({ limit: 1 }) });
 
   const copy = headingCopy[categorySlug];
   const isQuestionPage = categorySlug === "hoi-dap";
@@ -241,7 +241,6 @@ export function CategoryPage() {
 
   const title = copy?.title ?? category.data.name;
   const description = copy?.description ?? category.data.description;
-  const consultImage = banner.data?.data[0]?.image ?? lead?.image;
 
   return (
     <>
@@ -264,7 +263,7 @@ export function CategoryPage() {
               <SmallFeatureGrid articles={thumbnails} category={category.data} />
             </div>
             <HeadlineList articles={headlines} category={category.data} />
-            <ConsultationCard image={consultImage} />
+            <ConsultationCard />
           </section>
         ) : null}
 
@@ -289,7 +288,7 @@ export function CategoryPage() {
           <SidebarColumn categories={navigation.categories} />
         </section>
       </main>
-      <ConsultBanner image={consultImage} />
+      <ConsultBanner />
     </>
   );
 }

@@ -1,6 +1,11 @@
 import { api } from "./http";
 import type { ApiEnvelope, Article, Banner, Category, NavigationPayload, Page, Paginated, Video } from "../types/api";
 
+export type AdminDashboardData = {
+  counts: Record<"articles" | "leads" | "comments" | "videos", number>;
+  recentLeads: Record<string, unknown>[];
+};
+
 export async function getNavigation() {
   const response = await api.get<ApiEnvelope<NavigationPayload>>("/public/navigation");
   return response.data.data;
@@ -61,6 +66,11 @@ export async function listAdminResource(resource: string, params?: Record<string
   return response.data;
 }
 
+export async function getAdminDashboard() {
+  const response = await api.get<ApiEnvelope<AdminDashboardData>>("/admin/dashboard");
+  return response.data.data;
+}
+
 export async function createAdminResource(resource: string, payload: Record<string, unknown>) {
   const response = await api.post<ApiEnvelope<Record<string, unknown>>>(`/admin/${resource}`, payload);
   return response.data.data;
@@ -88,3 +98,9 @@ export async function uploadMedia(file: File, folder = "library") {
   });
   return response.data.data;
 }
+
+export async function getBackupData() {
+  const response = await api.get<Record<string, unknown[]>>("/admin/backup");
+  return response.data;
+}
+
