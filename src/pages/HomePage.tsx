@@ -53,7 +53,7 @@ function ShortArticleList({ articles, categories }: { articles: Article[]; categ
   );
 }
 
-function ConsultationCard() {
+function ConsultationCard({ image: _image }: { image?: string }) {
   return (
     <aside className="flex flex-col border border-slate-200 bg-white px-6 py-6 text-center gap-4">
       <div className="mx-auto flex h-14 w-14 items-center justify-center text-primary">
