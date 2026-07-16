@@ -333,6 +333,12 @@ export function AdminResourcePage() {
     onError: () => toast.error("Không xóa được bản ghi")
   });
 
+  function handleDelete(id: string) {
+    if (window.confirm("Bạn có chắc chắn muốn xóa bản ghi này không?")) {
+      deleteMutation.mutate(id);
+    }
+  }
+
   function openCreate() {
     const defaults = Object.fromEntries(
       fields.map((field) => [field.name, defaultValueFor(field)])
@@ -382,7 +388,7 @@ export function AdminResourcePage() {
             Quản lý dữ liệu qua form nhập liệu, có phân trang và tìm kiếm.
           </p>
         </div>
-        {resource !== "leads" && resource !== "comments" ? (
+        {resource !== "leads" && resource !== "comments" && resource !== "settings" ? (
           <button onClick={openCreate} className="inline-flex items-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-black text-white">
             <Plus className="h-4 w-4" />
             Tạo mới
@@ -514,9 +520,11 @@ export function AdminResourcePage() {
                         <Edit className="h-4 w-4" />
                       </button>
                     ) : null}
-                    <button onClick={() => deleteMutation.mutate(String(row._id))} className="inline-flex p-2 text-red-600">
-                      <Trash2 className="h-4 w-4" />
-                    </button>
+                    {resource !== "settings" && (
+                      <button onClick={() => handleDelete(String(row._id))} className="inline-flex p-2 text-red-600" title="Xóa">
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    )}
                   </td>
                 </tr>
               ))}

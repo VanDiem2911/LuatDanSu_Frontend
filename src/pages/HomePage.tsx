@@ -1,5 +1,5 @@
-import { BriefcaseBusiness, Calendar, ChevronRight, FileText, Play, Scale, Zap, Heart, Home, Coins } from "lucide-react";
-import { FormEvent, useMemo, useState } from "react";
+import { BriefcaseBusiness, Calendar, ChevronRight, FileText, Play, Scale, Zap, Heart, Home, Coins, X } from "lucide-react";
+import { FormEvent, useMemo, useState, useEffect, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link, useOutletContext } from "react-router-dom";
 import { toast } from "sonner";
@@ -73,7 +73,7 @@ function ConsultationCard({ image: _image }: { image?: string }) {
       </div>
       <div className="flex flex-col gap-2.5">
         <Link
-          to="/lien-he"
+          to="/dang-ky-tu-van"
           className="rounded-full bg-primary py-2.5 text-xs font-black uppercase text-white shadow-md shadow-indigo-100 transition hover:bg-primary-hover"
         >
           Đăng ký ngay
@@ -236,34 +236,118 @@ function SpecialtySection({ categories }: { categories: Category[] }) {
 function VideoSection({ videos }: { videos: Video[] }) {
   if (!videos || videos.length === 0) return null;
 
-  // Duplicate list to ensure seamless infinite marquee looping
+  const [activeVideoId, setActiveVideoId] = useState<string | null>(null);
+  const [isStatic, setIsStatic] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
+  
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [startX, setStartX] = useState(0);
+  const [scrollLeftState, setScrollLeftState] = useState(0);
+  const dragThreshold = 5;
+  const [dragDistance, setDragDistance] = useState(0);
+
   const marqueeVideos = [...videos, ...videos];
+
+  useEffect(() => {
+    if (isStatic) return;
+    let frameId: number;
+    const container = containerRef.current;
+    if (!container) return;
+
+    const scroll = () => {
+      if (isHovered || isDragging) {
+        frameId = requestAnimationFrame(scroll);
+        return;
+      }
+      container.scrollLeft += 0.7;
+      const halfWidth = container.scrollWidth / 2;
+      if (container.scrollLeft >= halfWidth) {
+        container.scrollLeft -= halfWidth;
+      }
+      frameId = requestAnimationFrame(scroll);
+    };
+
+    frameId = requestAnimationFrame(scroll);
+    return () => cancelAnimationFrame(frameId);
+  }, [isStatic, isHovered, isDragging]);
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    setIsStatic(true);
+    const container = containerRef.current;
+    if (!container) return;
+    setIsDragging(true);
+    setStartX(e.pageX - container.offsetLeft);
+    setScrollLeftState(container.scrollLeft);
+    setDragDistance(0);
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging) return;
+    e.preventDefault();
+    const container = containerRef.current;
+    if (!container) return;
+    const x = e.pageX - container.offsetLeft;
+    const walk = (x - startX) * 1.5;
+    container.scrollLeft = scrollLeftState - walk;
+    setDragDistance(Math.abs(x - startX));
+  };
+
+  const handleMouseUpOrLeave = () => {
+    setIsDragging(false);
+  };
+
+  const handleTouchStart = () => {
+    setIsStatic(true);
+  };
+
+  const handleVideoClick = (youtubeId: string, e: React.MouseEvent) => {
+    if (dragDistance > dragThreshold) {
+      e.preventDefault();
+      return;
+    }
+    setActiveVideoId(youtubeId);
+  };
 
   return (
     <section className="pb-12 overflow-hidden">
       <SectionHeading title="Video tư vấn pháp luật" />
-      <div className="w-full overflow-hidden mt-4">
-        <div className="marquee-track gap-5">
+      <div className="w-full mt-4">
+        <div
+          ref={containerRef}
+          onMouseDown={handleMouseDown}
+          onMouseMove={handleMouseMove}
+          onMouseUp={handleMouseUpOrLeave}
+          onMouseLeave={() => {
+            handleMouseUpOrLeave();
+            setIsHovered(false);
+          }}
+          onMouseEnter={() => setIsHovered(true)}
+          onTouchStart={handleTouchStart}
+          className="flex gap-5 overflow-x-auto select-none scrollbar-none cursor-grab active:cursor-grabbing py-2 px-1"
+          style={{ scrollBehavior: isDragging ? "auto" : "smooth" }}
+        >
           {marqueeVideos.map((video, index) => (
             <article
               key={`${video._id}-${index}`}
-              className="w-[280px] sm:w-[340px] flex-shrink-0 group bg-white border border-slate-200"
+              onClick={(e) => handleVideoClick(video.youtubeId, e)}
+              className="w-[280px] sm:w-[340px] flex-shrink-0 group bg-white border border-slate-200 shadow-sm transition hover:shadow-soft duration-300"
             >
-              <div className="aspect-video overflow-hidden bg-slate-900">
-                <iframe
-                  className="h-full w-full"
-                  src={`https://www.youtube.com/embed/${video.youtubeId}`}
-                  title={video.title}
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
+              <div className="aspect-video overflow-hidden bg-slate-900 relative cursor-pointer">
+                <img
+                  src={`https://img.youtube.com/vi/${video.youtubeId}/hqdefault.jpg`}
+                  alt={video.title}
+                  className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105 pointer-events-none"
                   loading="lazy"
                 />
-              </div>
-              <div className="border border-t-0 border-slate-100 px-4 py-3">
-                <h3 className="flex items-center gap-3 line-clamp-1 text-sm font-bold text-slate-800 group-hover:text-primary">
-                  <span className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
-                    <Play className="ml-0.5 h-4 w-4 fill-current" />
+                <div className="absolute inset-0 bg-navy/20 flex items-center justify-center opacity-90 group-hover:opacity-100 transition-opacity">
+                  <span className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/95 text-white shadow-lg transition-transform duration-300 group-hover:scale-110">
+                    <Play className="ml-1 h-6 w-6 fill-current" />
                   </span>
+                </div>
+              </div>
+              <div className="border border-t-0 border-slate-100 px-4 py-3 pointer-events-none">
+                <h3 className="line-clamp-1 text-sm font-bold text-slate-800 group-hover:text-primary">
                   {video.title}
                 </h3>
               </div>
@@ -271,6 +355,33 @@ function VideoSection({ videos }: { videos: Video[] }) {
           ))}
         </div>
       </div>
+
+      {activeVideoId && (
+        <div
+          onClick={() => setActiveVideoId(null)}
+          className="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-950/75 p-4 transition-opacity duration-300"
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="relative w-full max-w-4xl bg-black aspect-video shadow-2xl border border-slate-800 rounded-lg overflow-hidden"
+          >
+            <iframe
+              className="h-full w-full"
+              src={`https://www.youtube.com/embed/${activeVideoId}?autoplay=1`}
+              title="YouTube Video Player"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+            />
+            <button
+              onClick={() => setActiveVideoId(null)}
+              className="absolute top-4 right-4 flex h-9 w-9 items-center justify-center rounded-full bg-black/60 text-white hover:bg-primary transition hover:scale-105"
+              aria-label="Close video"
+            >
+              <X className="h-5 w-5" />
+            </button>
+          </div>
+        </div>
+      )}
     </section>
   );
 }

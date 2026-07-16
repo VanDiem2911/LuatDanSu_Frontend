@@ -69,7 +69,7 @@ function ConsultationCard({ image: _image }: { image?: string }) {
         <img src="/lawyer.png" alt="Tư vấn luật" className="h-full w-full object-cover" loading="lazy" />
       </div>
       <div className="flex flex-col gap-2.5">
-        <Link to="/lien-he" className="rounded-full bg-primary py-2.5 text-xs font-black uppercase text-white shadow-md">
+        <Link to="/dang-ky-tu-van" className="rounded-full bg-primary py-2.5 text-xs font-black uppercase text-white shadow-md">
           Đăng ký ngay
         </Link>
         <a href="tel:0903601234" className="rounded-full border border-slate-200 py-2 text-xs font-black text-primary hover:bg-slate-50">

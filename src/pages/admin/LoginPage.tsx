@@ -23,7 +23,7 @@ export function LoginPage() {
     setLoading(true);
     try {
       const result = await login({ email, password });
-      window.localStorage.setItem("admin_token", result.token);
+      window.sessionStorage.setItem("admin_token", result.token);
       toast.success("Đăng nhập thành công");
       navigate("/admin");
     } catch {

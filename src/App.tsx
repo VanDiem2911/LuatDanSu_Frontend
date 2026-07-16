@@ -10,6 +10,7 @@ import { AdminDashboardPage } from "./pages/admin/AdminDashboardPage";
 import { AdminResourcePage } from "./pages/admin/AdminResourcePage";
 import { LoginPage } from "./pages/admin/LoginPage";
 import { NotFoundPage } from "./pages/NotFoundPage";
+import { ContactPage } from "./pages/ContactPage";
 import { ScrollToTop } from "./components/ScrollToTop";
 
 export function App() {
@@ -21,7 +22,8 @@ export function App() {
           <Route index element={<HomePage />} />
           <Route path="tim-kiem" element={<SearchPage />} />
           <Route path="gioi-thieu" element={<StaticPage slug="gioi-thieu" />} />
-          <Route path="lien-he" element={<StaticPage slug="lien-he" />} />
+          <Route path="lien-he" element={<ContactPage />} />
+          <Route path="dang-ky-tu-van" element={<ContactPage />} />
           <Route path=":categorySlug" element={<CategoryPage />} />
           <Route path=":categorySlug/:articleSlug" element={<ArticlePage />} />
         </Route>

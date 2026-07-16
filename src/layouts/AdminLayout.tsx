@@ -42,12 +42,13 @@ function AdminLogo() {
 export function AdminLayout() {
   const navigate = useNavigate();
   const location = useLocation();
-  const token = window.localStorage.getItem("admin_token");
+  const token = window.sessionStorage.getItem("admin_token");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   if (!token) return <Navigate to="/admin/login" replace />;
 
   function logout() {
+    window.sessionStorage.removeItem("admin_token");
     window.localStorage.removeItem("admin_token");
     navigate("/admin/login");
   }
