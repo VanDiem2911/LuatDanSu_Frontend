@@ -1,4 +1,4 @@
-import { Search } from "lucide-react";
+import { Search, Menu, X } from "lucide-react";
 import { FormEvent, useState } from "react";
 import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { FloatingContact } from "../components/FloatingContact";
@@ -45,6 +45,7 @@ export function PublicLayout() {
   const navigate = useNavigate();
   const location = useLocation();
   const [query, setQuery] = useState("");
+  const [menuOpen, setMenuOpen] = useState(false);
   const navigationData = navigation.data ?? fallbackNavigation;
   const site = settingValue<SiteSetting>(navigationData.settings, "site", fallbackSite);
   const offices = settingValue<Office[]>(navigationData.settings, "offices", []);
@@ -117,34 +118,69 @@ export function PublicLayout() {
                   </button>
                 </div>
               </form>
+              <button
+                onClick={() => setMenuOpen(true)}
+                className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 text-slate-700 hover:bg-slate-200 lg:hidden transition-colors"
+                aria-label="Menu"
+              >
+                <Menu className="h-6 w-6" />
+              </button>
             </div>
           </div>
-          <nav className="mt-4 lg:hidden">
-            <div className="-mx-2 flex items-center gap-6 overflow-x-auto px-2 py-1">
-              {menuItems.map((item) => (
-                <NavLink
-                  key={item.href}
-                  to={item.href}
-                  onClick={() => {
-                    if (location.pathname === item.href) {
-                      window.scrollTo({ top: 0, behavior: "smooth" });
-                    }
-                  }}
-                  className={({ isActive }) =>
-                    `whitespace-nowrap text-[0.95rem] transition-colors ${
-                      isActive
-                        ? "border-b-2 border-primary font-bold text-primary"
-                        : "font-medium text-slate-800"
-                    }`
-                  }
-                >
-                  {item.label}
-                </NavLink>
-              ))}
-            </div>
-          </nav>
         </div>
       </header>
+
+      {/* Mobile Drawer Menu */}
+      <div className={`fixed inset-0 z-[200] lg:hidden transition-opacity duration-300 ${menuOpen ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"}`}>
+        {/* Backdrop */}
+        <div onClick={() => setMenuOpen(false)} className="absolute inset-0 bg-black/40 backdrop-blur-xs" />
+        
+        {/* Drawer Content */}
+        <div className={`absolute right-0 top-0 bottom-0 w-[280px] bg-white p-6 shadow-2xl flex flex-col gap-6 transition-transform duration-300 ${menuOpen ? "translate-x-0" : "translate-x-full"}`}>
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-bold uppercase tracking-wider text-slate-400">Danh mục</span>
+            <button
+              onClick={() => setMenuOpen(false)}
+              className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 transition-colors"
+            >
+              <X className="h-5 w-5" />
+            </button>
+          </div>
+          
+          <nav className="flex-1">
+            <ul className="flex flex-col gap-4">
+              {menuItems.map((item) => (
+                <li key={item.href}>
+                  <NavLink
+                    to={item.href}
+                    onClick={() => {
+                      setMenuOpen(false);
+                      if (location.pathname === item.href) {
+                        window.scrollTo({ top: 0, behavior: "smooth" });
+                      }
+                    }}
+                    className={({ isActive }) =>
+                      `block py-2 text-base transition-colors ${
+                        isActive ? "font-bold text-[#282973]" : "font-medium text-slate-800 hover:text-primary"
+                      }`
+                    }
+                  >
+                    {item.label}
+                  </NavLink>
+                </li>
+              ))}
+            </ul>
+          </nav>
+          
+          <div className="border-t border-slate-100 pt-6">
+            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Liên hệ nhanh</p>
+            <a href={`tel:${site.hotline.replace(/\s/g, "")}`} className="block font-black text-lg text-primary hover:text-primary-hover">
+              {site.hotline}
+            </a>
+            <span className="block text-sm font-medium text-slate-500 mt-1">{site.email}</span>
+          </div>
+        </div>
+      </div>
 
       {navigation.isFetching ? (
         <div className="fixed left-0 right-0 top-0 z-[120] h-1 overflow-hidden bg-primary/10" aria-hidden="true">
