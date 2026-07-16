@@ -51,13 +51,13 @@ const categoryOptions = [
 
 const fieldConfigs: Record<string, FieldConfig[]> = {
   articles: [
-    { name: "title", label: "Tiêu đề", full: true, required: true },
+    { name: "title", label: "Tiêu đề", full: true, required: true, minLength: 3 },
     { name: "categorySlug", label: "Chuyên mục", type: "select", options: categoryOptions, required: true },
     { name: "status", label: "Trạng thái", type: "select", options: statusOptions(), required: true },
     { name: "publishedAt", label: "Ngày đăng", placeholder: "2026-05-06T15:45:31.125Z" },
     { name: "image", label: "Ảnh đại diện", full: true, pattern: REGEX.url, patternMessage: VALIDATION_MESSAGES.url, inputMode: "url" },
-    { name: "excerpt", label: "Mô tả ngắn", type: "textarea", rows: 3, full: true, required: true },
-    { name: "content", label: "Nội dung bài viết", type: "richtext", rows: 5, full: true, required: true },
+    { name: "excerpt", label: "Mô tả ngắn", type: "textarea", rows: 3, full: true, required: true, minLength: 10 },
+    { name: "content", label: "Nội dung bài viết", type: "richtext", rows: 5, full: true, required: true, minLength: 20 },
     { name: "tagSlugs", label: "Tags", type: "array", placeholder: "dan-su, thua-ke" },
     { name: "featured", label: "Bài nổi bật", type: "checkbox" },
     { name: "views", label: "Lượt xem", type: "number" }
@@ -111,10 +111,10 @@ const fieldConfigs: Record<string, FieldConfig[]> = {
     { name: "isActive", label: "Đang bật", type: "checkbox" }
   ],
   comments: [
-    { name: "name", label: "Họ tên" },
-    { name: "email", label: "Email", pattern: REGEX.email, patternMessage: VALIDATION_MESSAGES.email, inputMode: "email" },
+    { name: "name", label: "Họ tên", required: true, minLength: 2 },
+    { name: "email", label: "Email", pattern: REGEX.email, patternMessage: VALIDATION_MESSAGES.email, inputMode: "email", required: true },
     { name: "status", label: "Trạng thái", type: "select", options: [{ label: "Chờ duyệt", value: "pending" }, { label: "Đã duyệt", value: "approved" }, { label: "Spam", value: "spam" }] },
-    { name: "content", label: "Nội dung câu hỏi", type: "textarea", rows: 6, full: true }
+    { name: "content", label: "Nội dung câu hỏi", type: "textarea", rows: 6, full: true, required: true, minLength: 5 }
   ],
   leads: [
     { name: "phone", label: "Số điện thoại", pattern: REGEX.phone, patternMessage: VALIDATION_MESSAGES.phone, inputMode: "tel" },
@@ -320,7 +320,38 @@ export function AdminResourcePage() {
       queryClient.invalidateQueries({ queryKey: ["admin-resource", resource] });
       queryClient.invalidateQueries({ queryKey: ["admin-count", resource] });
     },
-    onError: () => toast.error("Không lưu được dữ liệu. Kiểm tra thông tin trong form.")
+    onError: (err: any) => {
+      const serverMessage = err.response?.data?.error;
+      const details = err.response?.data?.details;
+      
+      if (serverMessage === "Validation failed" && details?.fieldErrors) {
+        const messages = Object.entries(details.fieldErrors)
+          .map(([field, errors]) => {
+            const fieldLabel = fields.find((f) => f.name === field)?.label || field;
+            let errorMsg = Array.isArray(errors) ? errors[0] : String(errors);
+            
+            if (errorMsg.includes("must contain at least")) {
+              const minMatch = errorMsg.match(/at least (\d+)/);
+              const min = minMatch ? minMatch[1] : "";
+              errorMsg = `phải có ít nhất ${min} ký tự.`;
+            } else if (errorMsg.includes("Required")) {
+              errorMsg = "không được để trống.";
+            } else if (errorMsg.includes("Invalid url")) {
+              errorMsg = "không đúng định dạng URL.";
+            } else if (errorMsg.includes("Invalid email")) {
+              errorMsg = "không đúng định dạng email.";
+            }
+            
+            return `• ${fieldLabel}: ${errorMsg}`;
+          })
+          .join("\n");
+        toast.error(`Lưu thất bại. Vui lòng kiểm tra lại:\n${messages}`);
+      } else if (serverMessage) {
+        toast.error(`Lỗi: ${serverMessage}`);
+      } else {
+        toast.error("Không lưu được dữ liệu. Kiểm tra thông tin trong form.");
+      }
+    }
   });
 
   const deleteMutation = useMutation({
