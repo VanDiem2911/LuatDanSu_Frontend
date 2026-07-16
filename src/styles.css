@@ -12,6 +12,12 @@
   box-sizing: border-box;
 }
 
+h1, h2, h3, h4, h5, h6, p, a, span, li, article {
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  word-break: break-word;
+}
+
 html, body {
   margin: 0;
   min-height: 100vh;
