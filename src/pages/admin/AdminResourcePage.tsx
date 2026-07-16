@@ -909,6 +909,9 @@ function hydrateForm(fields: FieldConfig[], data: Record<string, unknown>) {
   return Object.fromEntries(
     fields.map((field) => {
       const value = data[field.name];
+      if (field.name === "publishedAt" && value) {
+        return [field.name, toGmt7ISOString(new Date(String(value)))];
+      }
       if (field.type === "array") return [field.name, Array.isArray(value) ? value.join(", ") : value ?? ""];
       if (field.type === "json") return [field.name, JSON.stringify(value ?? defaultValueFor(field), null, 2)];
       if (field.type === "richtext") return [field.name, stripHtml(String(value ?? ""))];
@@ -993,8 +996,30 @@ function validateFormValues(fields: FieldConfig[], values: Record<string, unknow
   return "";
 }
 
+function toGmt7ISOString(date: Date) {
+  const pad = (num: number) => String(num).padStart(2, '0');
+  const padMs = (num: number) => String(num).padStart(3, '0');
+  const gmt7Date = new Date(date.getTime() + 7 * 3600000);
+  const yyyy = gmt7Date.getUTCFullYear();
+  const mm = pad(gmt7Date.getUTCMonth() + 1);
+  const dd = pad(gmt7Date.getUTCDate());
+  const hh = pad(gmt7Date.getUTCHours());
+  const min = pad(gmt7Date.getUTCMinutes());
+  const ss = pad(gmt7Date.getUTCSeconds());
+  const ms = padMs(gmt7Date.getUTCMilliseconds());
+  return `${yyyy}-${mm}-${dd}T${hh}:${min}:${ss}.${ms}+07:00`;
+}
+
+function formatAdminDate(value: unknown) {
+  if (!value) return "";
+  const date = new Date(String(value));
+  if (isNaN(date.getTime())) return String(value);
+  const pad = (num: number) => String(num).padStart(2, '0');
+  return `${pad(date.getHours())}:${pad(date.getMinutes())} ${pad(date.getDate())}/${pad(date.getMonth() + 1)}/${date.getFullYear()}`;
+}
+
 function defaultValueFor(field: FieldConfig) {
-  if (field.name === "publishedAt") return new Date().toISOString();
+  if (field.name === "publishedAt") return toGmt7ISOString(new Date());
   if (field.name === "order") return 1;
   if (field.name === "status") return "published";
   if (field.type === "checkbox") return false;
@@ -1115,6 +1140,9 @@ function renderValue(value: unknown) {
 function renderCell(row: Record<string, unknown>, column: string) {
   if (column === "value" && "key" in row) {
     return renderSettingSummary(String(row.key ?? ""), row.value);
+  }
+  if (["createdAt", "updatedAt", "publishedAt"].includes(column)) {
+    return formatAdminDate(row[column]);
   }
   if (column === "phone") {
     const phone = String(row[column] ?? "");
