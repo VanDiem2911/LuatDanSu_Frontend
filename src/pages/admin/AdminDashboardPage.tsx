@@ -75,8 +75,8 @@ export function AdminDashboardPage() {
           return (
             <div key={card.resource} className="rounded-xl border border-slate-200 bg-white p-8 shadow-sm">
               <div className="flex items-start justify-between gap-4">
-                <div>
-                  <p className="text-base font-semibold text-slate-500">{card.label}</p>
+                <div className="flex-1">
+                  <p className="text-base font-semibold text-slate-500 min-h-[48px] flex items-start">{card.label}</p>
                   <p className="mt-6 text-4xl font-black text-navy">
                     {dashboard.isLoading ? "..." : dashboard.data?.counts[card.resource] ?? 0}
                   </p>

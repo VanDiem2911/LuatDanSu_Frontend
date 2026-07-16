@@ -416,7 +416,9 @@ export function AdminResourcePage() {
         <div>
           <h1 className="section-title text-[1.7rem]">{label}</h1>
           <p className="mt-3 text-sm font-medium text-slate-500">
-            Quản lý dữ liệu qua form nhập liệu, có phân trang và tìm kiếm.
+            {resource === "settings"
+              ? "Thiết lập phương thức liên lạc và địa chỉ của văn phòng."
+              : "Quản lý dữ liệu qua form nhập liệu, có phân trang và tìm kiếm."}
           </p>
         </div>
         {resource !== "leads" && resource !== "comments" && resource !== "settings" ? (
