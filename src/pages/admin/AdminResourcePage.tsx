@@ -994,7 +994,7 @@ function validateFormValues(fields: FieldConfig[], values: Record<string, unknow
 function defaultValueFor(field: FieldConfig) {
   if (field.name === "publishedAt") return new Date().toISOString();
   if (field.name === "order") return 1;
-  if (field.name === "status") return "draft";
+  if (field.name === "status") return "published";
   if (field.type === "checkbox") return false;
   if (field.type === "number") return 0;
   if (field.type === "array") return "";
