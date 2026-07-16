@@ -132,8 +132,19 @@ export function ArticlePage() {
 
 function getDownloadUrl(url?: string) {
   if (!url) return "";
-  if (url.includes("res.cloudinary.com") && url.includes("/upload/")) {
-    return url.replace("/upload/", "/upload/fl_attachment/");
+  
+  let filename = "document.docx";
+  try {
+    const parsedUrl = new URL(url);
+    const paramName = parsedUrl.searchParams.get("filename");
+    if (paramName) {
+      filename = paramName;
+    }
+  } catch (e) {
+    // Ignore URL parse error
   }
-  return url;
+
+  const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:3001/api";
+  const baseUrl = API_URL.replace(/\/api$/, "");
+  return `${baseUrl}/api/public/download?url=${encodeURIComponent(url)}&filename=${encodeURIComponent(filename)}`;
 }
