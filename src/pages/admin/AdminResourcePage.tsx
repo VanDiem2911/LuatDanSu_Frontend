@@ -1,6 +1,6 @@
 import { FormEvent, useMemo, useState, useEffect } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Edit, Plus, Search, Trash2, X, Copy, MessageSquarePlus } from "lucide-react";
+import { Edit, Plus, Search, Trash2, X, Copy, MessageSquarePlus, FileText } from "lucide-react";
 import { useParams, useSearchParams, useNavigate, useLocation } from "react-router-dom";
 import { toast } from "sonner";
 import { createAdminResource, deleteAdminResource, listAdminResource, updateAdminResource, uploadMedia } from "../../services/cms";
@@ -746,6 +746,60 @@ function FieldInput({
     queryFn: () => listAdminResource("tags", { limit: 100 }),
     enabled: type === "array" && field.name === "tagSlugs"
   });
+
+  if (field.name === "fileUrl") {
+    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+
+      try {
+        setUploading(true);
+        const res = await uploadMedia(file, "library");
+        onChange(res.url);
+        toast.success("Tải tài liệu lên Cloudinary thành công!");
+      } catch (err) {
+        console.error("Upload error:", err);
+        toast.error("Không thể tải tài liệu lên!");
+      } finally {
+        setUploading(false);
+      }
+    };
+
+    return (
+      <div className={`block ${wrapperClass}`}>
+        <span className="mb-1.5 block text-sm font-bold text-slate-700">{field.label}</span>
+        <div className="flex flex-col gap-2 rounded border border-slate-200 bg-slate-50 p-3">
+          {value ? (
+            <div className="text-xs text-blue-600 font-semibold truncate bg-white border border-slate-200 rounded px-3 py-2 flex items-center gap-1.5">
+              <FileText className="h-4 w-4" />
+              <span className="truncate">{String(value)}</span>
+            </div>
+          ) : (
+            <div className="text-xs text-slate-400 italic">Chưa chọn tài liệu đính kèm</div>
+          )}
+          <div className="flex gap-2">
+            <input
+              type="text"
+              value={String(value ?? "")}
+              onChange={(e) => onChange(e.target.value)}
+              placeholder="Nhập đường dẫn tài liệu (URL) hoặc tải file từ máy..."
+              className="flex-1 border border-slate-200 bg-white px-3 py-1.5 text-sm outline-none focus:border-primary"
+            />
+            <label className="cursor-pointer bg-primary hover:bg-primary-hover text-white font-bold text-xs flex items-center justify-center px-4 py-2 rounded shadow-sm whitespace-nowrap">
+              {uploading ? "Đang tải..." : "Tải tài liệu lên"}
+              <input
+                type="file"
+                accept=".pdf,.doc,.docx,.xls,.xlsx"
+                onChange={handleFileChange}
+                disabled={uploading}
+                className="hidden"
+              />
+            </label>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (field.name === "image") {
     const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
