@@ -1,6 +1,6 @@
 import { ChevronRight, Play, Scale, Search, Zap } from "lucide-react";
-import { useMemo, useState } from "react";
-import { Link, useOutletContext, useParams } from "react-router-dom";
+import { FormEvent, useMemo, useState } from "react";
+import { Link, useOutletContext, useParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { Breadcrumb } from "../components/Breadcrumb";
 import { ConsultBanner } from "../components/ConsultBanner";
@@ -175,11 +175,27 @@ function ArticleRow({ article, category, question = false }: { article: Article;
 }
 
 function SidebarColumn({ categories }: { categories: Category[] }) {
+  const navigate = useNavigate();
+  const [query, setQuery] = useState("");
+
+  function handleSearch(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const trimmed = query.trim();
+    if (trimmed) {
+      navigate(`/tim-kiem?q=${encodeURIComponent(trimmed)}`);
+    }
+  }
+
   return (
     <div className="space-y-8">
-      <form className="flex items-center rounded-full border border-slate-200 bg-white px-4">
+      <form onSubmit={handleSearch} className="flex items-center rounded-full border border-slate-200 bg-white px-4">
         <Search className="h-4 w-4 text-slate-400" />
-        <input className="w-full bg-transparent px-3 py-3 text-sm outline-none" placeholder="Tìm kiếm bài viết..." />
+        <input
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          className="w-full bg-transparent px-3 py-3 text-sm outline-none"
+          placeholder="Tìm kiếm bài viết..."
+        />
       </form>
       <Sidebar categories={categories} />
     </div>
@@ -249,15 +265,15 @@ export function CategoryPage() {
         <div className="container-page">
           <Breadcrumb items={[{ label: title, href: `/${category.data.slug}` }]} />
           <div className="max-w-3xl">
-            <h1 className="mb-4 text-4xl font-black leading-tight tracking-tight text-ink md:text-5xl">{title}</h1>
-            <p className="max-w-2xl text-lg font-medium leading-relaxed text-slate-500">{description}</p>
+            <h1 className="mb-4 text-3xl font-black leading-tight tracking-tight text-ink sm:text-4xl md:text-5xl">{title}</h1>
+            <p className="max-w-2xl text-base font-medium leading-relaxed text-slate-500 sm:text-lg">{description}</p>
           </div>
         </div>
       </div>
 
       <main className="container-page py-14">
         {!hideTopSection && lead ? (
-          <section className="mb-14 grid gap-8 lg:grid-cols-[1.55fr_0.7fr_0.8fr]">
+          <section className="mb-14 grid grid-cols-1 gap-8 lg:grid-cols-[1.55fr_0.7fr_0.8fr]">
             <div>
               <TopStory article={lead} category={category.data} />
               <SmallFeatureGrid articles={thumbnails} category={category.data} />

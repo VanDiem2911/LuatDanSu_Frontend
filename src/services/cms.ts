@@ -16,8 +16,10 @@ export async function getArticles(params?: Record<string, unknown>) {
   return response.data;
 }
 
-export async function getArticle(idOrSlug: string) {
-  const response = await api.get<ApiEnvelope<Article>>(`/public/articles/${idOrSlug}`);
+export async function getArticle(idOrSlug: string, categorySlug?: string) {
+  const response = await api.get<ApiEnvelope<Article>>(`/public/articles/${idOrSlug}`, {
+    params: categorySlug ? { categorySlug } : undefined
+  });
   return response.data.data;
 }
 

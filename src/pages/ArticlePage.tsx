@@ -11,9 +11,12 @@ import type { NavigationPayload } from "../types/api";
 import { formatDate } from "../utils/format";
 
 export function ArticlePage() {
-  const { articleSlug = "" } = useParams();
+  const { categorySlug = "", articleSlug = "" } = useParams();
   const navigation = useOutletContext<NavigationPayload>();
-  const article = useQuery({ queryKey: ["article", articleSlug], queryFn: () => getArticle(articleSlug) });
+  const article = useQuery({
+    queryKey: ["article", categorySlug, articleSlug],
+    queryFn: () => getArticle(articleSlug, categorySlug)
+  });
 
   if (article.isLoading) return <Loading variant="article" />;
   if (article.isError || !article.data) return <ErrorState title="Không tìm thấy bài viết" />;
