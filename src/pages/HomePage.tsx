@@ -237,7 +237,6 @@ function VideoSection({ videos }: { videos: Video[] }) {
   if (!videos || videos.length === 0) return null;
 
   const [activeVideoId, setActiveVideoId] = useState<string | null>(null);
-  const [isStatic, setIsStatic] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   
   const containerRef = useRef<HTMLDivElement>(null);
@@ -250,7 +249,6 @@ function VideoSection({ videos }: { videos: Video[] }) {
   const marqueeVideos = [...videos, ...videos];
 
   useEffect(() => {
-    if (isStatic) return;
     let frameId: number;
     const container = containerRef.current;
     if (!container) return;
@@ -270,10 +268,9 @@ function VideoSection({ videos }: { videos: Video[] }) {
 
     frameId = requestAnimationFrame(scroll);
     return () => cancelAnimationFrame(frameId);
-  }, [isStatic, isHovered, isDragging, activeVideoId]);
+  }, [isHovered, isDragging, activeVideoId]);
 
   const handleMouseDown = (e: React.MouseEvent) => {
-    setIsStatic(true);
     const container = containerRef.current;
     if (!container) return;
     setIsDragging(true);
@@ -297,16 +294,11 @@ function VideoSection({ videos }: { videos: Video[] }) {
     setIsDragging(false);
   };
 
-  const handleTouchStart = () => {
-    setIsStatic(true);
-  };
-
   const handleVideoClick = (youtubeId: string, e: React.MouseEvent) => {
     if (dragDistance > dragThreshold) {
       e.preventDefault();
       return;
     }
-    setIsStatic(true);
     setActiveVideoId(youtubeId);
   };
 
@@ -324,7 +316,6 @@ function VideoSection({ videos }: { videos: Video[] }) {
             setIsHovered(false);
           }}
           onMouseEnter={() => setIsHovered(true)}
-          onTouchStart={handleTouchStart}
           className="flex gap-5 overflow-x-auto select-none scrollbar-none cursor-grab active:cursor-grabbing py-2 px-1"
           style={{ scrollBehavior: isDragging ? "auto" : "smooth" }}
         >
