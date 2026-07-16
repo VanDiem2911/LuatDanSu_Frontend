@@ -101,7 +101,7 @@ export function ArticlePage() {
                   </div>
                 </div>
                 <a
-                  href={article.data.fileUrl}
+                  href={getDownloadUrl(article.data.fileUrl)}
                   target="_blank"
                   rel="noopener noreferrer"
                   download
@@ -128,4 +128,12 @@ export function ArticlePage() {
       </main>
     </>
   );
+}
+
+function getDownloadUrl(url?: string) {
+  if (!url) return "";
+  if (url.includes("res.cloudinary.com") && url.includes("/upload/")) {
+    return url.replace("/upload/", "/upload/fl_attachment/");
+  }
+  return url;
 }
