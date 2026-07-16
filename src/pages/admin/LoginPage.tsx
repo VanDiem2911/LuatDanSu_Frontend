@@ -1,5 +1,5 @@
 import { FormEvent, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { login } from "../../services/cms";
 import { isValidEmail, PATTERNS, VALIDATION_MESSAGES } from "../../utils/validation";
@@ -68,6 +68,11 @@ export function LoginPage() {
           >
             Đăng nhập
           </button>
+          <div className="text-center mt-4">
+            <Link to="/" className="inline-flex items-center gap-1.5 text-sm font-bold text-slate-500 hover:text-primary transition">
+              &larr; Quay về trang chủ
+            </Link>
+          </div>
         </div>
       </form>
     </main>
