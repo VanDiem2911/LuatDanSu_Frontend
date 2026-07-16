@@ -256,7 +256,7 @@ function VideoSection({ videos }: { videos: Video[] }) {
     if (!container) return;
 
     const scroll = () => {
-      if (isHovered || isDragging) {
+      if (isHovered || isDragging || activeVideoId) {
         frameId = requestAnimationFrame(scroll);
         return;
       }
@@ -270,7 +270,7 @@ function VideoSection({ videos }: { videos: Video[] }) {
 
     frameId = requestAnimationFrame(scroll);
     return () => cancelAnimationFrame(frameId);
-  }, [isStatic, isHovered, isDragging]);
+  }, [isStatic, isHovered, isDragging, activeVideoId]);
 
   const handleMouseDown = (e: React.MouseEvent) => {
     setIsStatic(true);
@@ -306,6 +306,7 @@ function VideoSection({ videos }: { videos: Video[] }) {
       e.preventDefault();
       return;
     }
+    setIsStatic(true);
     setActiveVideoId(youtubeId);
   };
 
