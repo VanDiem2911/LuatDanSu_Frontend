@@ -104,7 +104,7 @@ export function PublicLayout() {
                   ))}
                 </ul>
               </nav>
-              <form onSubmit={handleSearch} className="relative w-40 sm:w-56 lg:w-64">
+              <form onSubmit={handleSearch} className="relative hidden sm:block sm:w-56 lg:w-64">
                 <div className="flex items-center rounded-full bg-slate-100 px-3 py-1.5 lg:px-4">
                   <input
                     value={query}
@@ -118,6 +118,13 @@ export function PublicLayout() {
                   </button>
                 </div>
               </form>
+              <button
+                onClick={() => setMenuOpen(true)}
+                className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 text-slate-700 hover:bg-slate-200 sm:hidden transition-colors"
+                aria-label="Tìm kiếm"
+              >
+                <Search className="h-5 w-5" />
+              </button>
               <button
                 onClick={() => setMenuOpen(true)}
                 className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 text-slate-700 hover:bg-slate-200 lg:hidden transition-colors"
@@ -146,6 +153,22 @@ export function PublicLayout() {
               <X className="h-5 w-5" />
             </button>
           </div>
+
+          {/* Mobile Search Bar inside Drawer */}
+          <form onSubmit={handleSearch} className="relative w-full">
+            <div className="flex items-center rounded-full bg-slate-100 px-4 py-2">
+              <input
+                value={query}
+                onChange={(event) => setQuery(event.target.value)}
+                type="text"
+                placeholder="Tìm kiếm..."
+                className="w-full border-none bg-transparent text-sm text-slate-700 outline-none placeholder:text-slate-500"
+              />
+              <button className="flex-shrink-0 rounded-full bg-primary p-1.5 text-white transition-colors hover:bg-primary-hover">
+                <Search className="h-4 w-4" />
+              </button>
+            </div>
+          </form>
           
           <nav className="flex-1">
             <ul className="flex flex-col gap-4">

@@ -1,5 +1,4 @@
-import { ChevronRight, Play, Scale, Search, Zap } from "lucide-react";
-import { FormEvent, useMemo, useState } from "react";
+import { FormEvent, useEffect, useMemo, useState } from "react";
 import { Link, useOutletContext, useParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { Breadcrumb } from "../components/Breadcrumb";
@@ -9,6 +8,7 @@ import { Loading } from "../components/Loading";
 import { Seo } from "../components/Seo";
 import { Sidebar } from "../components/Sidebar";
 import { getArticles, getCategory } from "../services/cms";
+import { ChevronRight, Play, Scale, Search, Zap } from "lucide-react";
 import type { Article, Category, NavigationPayload } from "../types/api";
 
 const headingCopy: Record<string, { title: string; description: string }> = {
@@ -174,16 +174,24 @@ function ArticleRow({ article, category, question = false }: { article: Article;
   );
 }
 
-function SidebarColumn({ categories }: { categories: Category[] }) {
-  const navigate = useNavigate();
-  const [query, setQuery] = useState("");
+function SidebarColumn({
+  categories,
+  search,
+  onSearch
+}: {
+  categories: Category[];
+  search: string;
+  onSearch: (val: string) => void;
+}) {
+  const [query, setQuery] = useState(search);
+
+  useEffect(() => {
+    setQuery(search);
+  }, [search]);
 
   function handleSearch(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const trimmed = query.trim();
-    if (trimmed) {
-      navigate(`/tim-kiem?q=${encodeURIComponent(trimmed)}`);
-    }
+    onSearch(query.trim());
   }
 
   return (
@@ -196,6 +204,18 @@ function SidebarColumn({ categories }: { categories: Category[] }) {
           className="w-full bg-transparent px-3 py-3 text-sm outline-none"
           placeholder="Tìm kiếm bài viết..."
         />
+        {search ? (
+          <button
+            type="button"
+            onClick={() => {
+              setQuery("");
+              onSearch("");
+            }}
+            className="text-xs font-bold text-slate-400 hover:text-slate-600 ml-2 whitespace-nowrap"
+          >
+            Xóa
+          </button>
+        ) : null}
       </form>
       <Sidebar categories={categories} />
     </div>
@@ -230,23 +250,31 @@ function Pagination({ page, totalPages, onChange }: { page: number; totalPages: 
 export function CategoryPage() {
   const { categorySlug = "" } = useParams();
   const [page, setPage] = useState(1);
+  const [search, setSearch] = useState("");
   const navigation = useOutletContext<NavigationPayload>();
   const category = useQuery({ queryKey: ["category", categorySlug], queryFn: () => getCategory(categorySlug) });
+
+  useEffect(() => {
+    setSearch("");
+    setPage(1);
+  }, [categorySlug]);
+
   const featureArticles = useQuery({
     queryKey: ["articles", categorySlug, "feature"],
     queryFn: () => getArticles({ categorySlug, limit: 12, sort: "publishedAt", order: "desc" }),
     enabled: Boolean(categorySlug)
   });
   const articles = useQuery({
-    queryKey: ["articles", categorySlug, "list", page],
-    queryFn: () => getArticles({ categorySlug, page, limit: 9, sort: "publishedAt", order: "desc" }),
+    queryKey: ["articles", categorySlug, "list", page, search],
+    queryFn: () => getArticles({ categorySlug, page, limit: 9, sort: "publishedAt", order: "desc", search }),
     enabled: Boolean(categorySlug),
     placeholderData: (previousData) => previousData
   });
 
   const copy = headingCopy[categorySlug];
   const isQuestionPage = categorySlug === "hoi-dap";
-  const hideTopSection = categorySlug === "hoi-dap" || categorySlug === "bieu-mau";
+  const hasActiveSearch = Boolean(search);
+  const hideTopSection = categorySlug === "hoi-dap" || categorySlug === "bieu-mau" || hasActiveSearch;
   const feature = featureArticles.data?.data ?? [];
   const lead = feature[0];
   const thumbnails = useMemo(() => feature.slice(1, 4), [feature]);
@@ -285,7 +313,13 @@ export function CategoryPage() {
 
         <section className="grid grid-cols-1 gap-10 lg:grid-cols-[1fr_320px]">
           <div>
-            {!isQuestionPage ? <h2 className="section-title mb-8 text-[1.35rem]">Bài viết mới nhất</h2> : null}
+            {!isQuestionPage ? (
+              <h2 className="section-title mb-8 text-[1.35rem]">
+                {hasActiveSearch ? `Kết quả tìm kiếm cho: "${search}"` : "Bài viết mới nhất"}
+              </h2>
+            ) : hasActiveSearch ? (
+              <h2 className="section-title mb-8 text-[1.35rem]">Kết quả tìm kiếm cho: "{search}"</h2>
+            ) : null}
             {articles.isLoading ? (
               <Loading />
             ) : articles.isError ? (
@@ -301,7 +335,7 @@ export function CategoryPage() {
               </>
             )}
           </div>
-          <SidebarColumn categories={navigation.categories} />
+          <SidebarColumn categories={navigation.categories} search={search} onSearch={(val) => { setSearch(val); setPage(1); }} />
         </section>
       </main>
       <ConsultBanner />
