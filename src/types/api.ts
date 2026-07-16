@@ -31,6 +31,7 @@ export type Article = {
   featured: boolean;
   views: number;
   publishedAt?: string;
+  fileUrl?: string;
   createdAt: string;
   updatedAt: string;
   seo?: Seo;

@@ -56,6 +56,7 @@ const fieldConfigs: Record<string, FieldConfig[]> = {
     { name: "status", label: "Trạng thái", type: "select", options: statusOptions(), required: true },
     { name: "publishedAt", label: "Ngày đăng", placeholder: "2026-05-06T15:45:31.125Z" },
     { name: "image", label: "Ảnh đại diện", full: true, pattern: REGEX.url, patternMessage: VALIDATION_MESSAGES.url, inputMode: "url" },
+    { name: "fileUrl", label: "File đính kèm (URL tài liệu tải về)", full: true, placeholder: "https://res.cloudinary.com/... hoặc /files/..." },
     { name: "excerpt", label: "Mô tả ngắn", type: "textarea", rows: 3, full: true, required: true, minLength: 10 },
     { name: "content", label: "Nội dung bài viết", type: "richtext", rows: 5, full: true, required: true, minLength: 20 },
     { name: "tagSlugs", label: "Tags", type: "array", placeholder: "dan-su, thua-ke" },

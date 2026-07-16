@@ -1,4 +1,4 @@
-import { Calendar, Tag, User } from "lucide-react";
+import { Calendar, Tag, User, FileText } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { useOutletContext, useParams } from "react-router-dom";
 import { Breadcrumb } from "../components/Breadcrumb";
@@ -89,6 +89,28 @@ export function ArticlePage() {
               className="prose-content"
               dangerouslySetInnerHTML={{ __html: article.data.content }}
             />
+            {article.data.fileUrl ? (
+              <div className="my-8 rounded-lg border border-blue-100 bg-blue-50/50 p-5 flex items-center justify-between gap-4">
+                <div className="flex items-center gap-3 text-left">
+                  <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-[#282973] text-white">
+                    <FileText className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-bold text-slate-800">Tài liệu đính kèm</h4>
+                    <p className="text-xs text-slate-500">Tải về mẫu đơn khởi kiện chuẩn từ Luật sư</p>
+                  </div>
+                </div>
+                <a
+                  href={article.data.fileUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  download
+                  className="inline-flex items-center gap-1.5 rounded-full bg-primary px-5 py-2.5 text-xs font-black uppercase text-white hover:bg-primary-hover shadow transition whitespace-nowrap"
+                >
+                  Tải mẫu đơn tại đây
+                </a>
+              </div>
+            ) : null}
             <div className="mt-12 border-t border-slate-100 pt-8">
               <span className="text-sm font-bold uppercase tracking-widest text-slate-900">Chia sẻ:</span>
               <button
