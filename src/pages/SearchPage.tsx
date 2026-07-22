@@ -6,14 +6,15 @@ import { BreadcrumbJsonLd } from "../components/JsonLd";
 import { ErrorState } from "../components/ErrorState";
 import { Loading } from "../components/Loading";
 import { Seo } from "../components/Seo";
-import { getArticles } from "../services/cms";
+import { getSearchArticles } from "../services/cms";
+import { queryKeys } from "../services/queryKeys";
 
 export function SearchPage() {
   const [params] = useSearchParams();
   const q = params.get("q") ?? "";
   const articles = useQuery({
-    queryKey: ["search", q],
-    queryFn: () => getArticles({ search: q, limit: 20 }),
+    queryKey: queryKeys.search(q),
+    queryFn: () => getSearchArticles(q),
     enabled: q.length > 0,
     placeholderData: (previousData) => previousData,
     staleTime: 5 * 60 * 1000
@@ -33,7 +34,7 @@ export function SearchPage() {
           <ErrorState />
         ) : (
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {articles.data?.data.map((article) => <ArticleCard key={article._id} article={article} />)}
+            {articles.data?.data.map((article, index) => <ArticleCard key={article._id} article={article} priority={index === 0} />)}
           </div>
         )}
       </main>

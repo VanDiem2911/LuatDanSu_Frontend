@@ -24,7 +24,7 @@ export function Seo({ title, description, canonical, image, type = "website", no
     ? image.startsWith("http")
       ? image
       : `${SITE_URL}${image.startsWith("/") ? "" : "/"}${image}`
-    : `${SITE_URL}/logo.png`;
+    : `${SITE_URL}/logo.webp`;
 
   return (
     <Helmet>
@@ -49,4 +49,3 @@ export function Seo({ title, description, canonical, image, type = "website", no
     </Helmet>
   );
 }
-

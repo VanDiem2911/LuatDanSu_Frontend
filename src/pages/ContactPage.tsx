@@ -144,7 +144,7 @@ export function ContactPage() {
                 </div>
                 <button
                   type="submit"
-                  aria-label="Gui yeu cau goi lai"
+                  aria-label="Gửi yêu cầu gọi lại"
                   disabled={isSubmittingPhone}
                   className="rounded-full bg-primary px-8 py-3 text-sm font-bold text-white transition hover:bg-primary-hover disabled:opacity-60"
                 >
@@ -205,7 +205,7 @@ export function ContactPage() {
                 <div className="flex justify-end">
                   <button
                     type="submit"
-                    aria-label="Gui cau hoi phap ly"
+                    aria-label="Gửi câu hỏi pháp lý"
                     disabled={isSubmittingQuestion}
                     className="w-full sm:w-auto rounded-full bg-navy px-8 py-3 text-sm font-bold text-white transition hover:bg-slate-800 disabled:opacity-60"
                   >
@@ -229,7 +229,7 @@ export function ContactPage() {
                     <PhoneCall className="h-5 w-5" />
                   </span>
                   <div>
-                    <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">Hotline hỗ trợ 24/7</h3>
+                    <h3 className="text-xs font-bold uppercase tracking-wider text-slate-600">Hotline hỗ trợ 24/7</h3>
                     <a href={`tel:${site.hotline.replace(/\s/g, "")}`} className="text-lg font-black text-blue-600 hover:underline">
                       {site.hotline}
                     </a>
@@ -241,7 +241,7 @@ export function ContactPage() {
                     <Mail className="h-5 w-5" />
                   </span>
                   <div>
-                    <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">Địa chỉ Email</h3>
+                    <h3 className="text-xs font-bold uppercase tracking-wider text-slate-600">Địa chỉ Email</h3>
                     <span className="text-sm font-bold text-slate-700">{site.email}</span>
                   </div>
                 </div>

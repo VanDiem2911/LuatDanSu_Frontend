@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { getArticles } from "../services/cms";
 import type { Category } from "../types/api";
@@ -6,9 +7,17 @@ import { ArticleCard } from "./ArticleCard";
 import { Loading } from "./Loading";
 
 export function Sidebar({ categories }: { categories: Category[] }) {
+  const [loadSecondaryContent, setLoadSecondaryContent] = useState(false);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => setLoadSecondaryContent(true), 800);
+    return () => window.clearTimeout(timer);
+  }, []);
+
   const popular = useQuery({
     queryKey: ["popular-articles"],
     queryFn: () => getArticles({ limit: 5, sort: "views", order: "desc" }),
+    enabled: loadSecondaryContent,
     placeholderData: (previousData) => previousData,
     staleTime: 10 * 60 * 1000
   });
@@ -16,6 +25,7 @@ export function Sidebar({ categories }: { categories: Category[] }) {
   const questions = useQuery({
     queryKey: ["question-articles"],
     queryFn: () => getArticles({ limit: 4, categorySlug: "hoi-dap" }),
+    enabled: loadSecondaryContent,
     placeholderData: (previousData) => previousData,
     staleTime: 10 * 60 * 1000
   });
@@ -44,8 +54,8 @@ export function Sidebar({ categories }: { categories: Category[] }) {
           Bài xem nhiều
         </h2>
         <div className="mt-3">
-          {popular.isLoading ? (
-            <Loading label="Đang tải bài viết" variant="compact" />
+          {!loadSecondaryContent || popular.isLoading ? (
+            <Loading label="Đang tải bài viết" variant="compact" count={5} />
           ) : (
             popular.data?.data.map((article) => <ArticleCard key={article._id} article={article} compact />)
           )}
@@ -57,7 +67,11 @@ export function Sidebar({ categories }: { categories: Category[] }) {
           Hỏi đáp cùng luật sư
         </h2>
         <div className="mt-3">
-          {questions.data?.data.map((article) => <ArticleCard key={article._id} article={article} compact />)}
+          {!loadSecondaryContent || questions.isLoading ? (
+            <Loading label="Đang tải hỏi đáp" variant="compact" count={4} />
+          ) : (
+            questions.data?.data.map((article) => <ArticleCard key={article._id} article={article} compact />)
+          )}
         </div>
       </section>
     </aside>

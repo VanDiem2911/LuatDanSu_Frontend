@@ -82,7 +82,7 @@ export function LeadForms() {
             </label>
             <button
               type="submit"
-              aria-label="Yeu cau goi lai ngay"
+              aria-label="Yêu cầu gọi lại ngay"
               disabled={isSubmittingPhone}
               className="w-full rounded-full bg-primary py-3 text-sm font-bold text-white shadow-md shadow-indigo-100 transition hover:bg-primary-hover disabled:opacity-60"
             >
@@ -118,7 +118,7 @@ export function LeadForms() {
             </label>
             <button
               type="submit"
-              aria-label="Gui cau hoi toi luat su"
+              aria-label="Gửi câu hỏi tới luật sư"
               disabled={isSubmittingQuestion}
               className="w-full rounded-full border-2 border-primary py-2.5 text-sm font-bold text-primary transition hover:bg-primary hover:text-white disabled:opacity-60"
             >

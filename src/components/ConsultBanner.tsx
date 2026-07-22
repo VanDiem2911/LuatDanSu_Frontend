@@ -22,10 +22,10 @@ export function ConsultBanner() {
     <section className="pt-0">
       <div className="relative h-56 overflow-hidden sm:h-64">
         <img
-          src="/consult-banner.jpg"
+          src="/consult-banner.webp"
           alt="Tư vấn pháp luật dân sự"
           width={1280}
-          height={256}
+          height={720}
           loading="lazy"
           decoding="async"
           className="absolute inset-0 z-0 h-full w-full scale-x-[-1] object-cover object-[center_42%]"
@@ -47,7 +47,7 @@ export function ConsultBanner() {
               required
               className="w-full rounded-full border border-slate-300 bg-white px-6 py-2.5 text-black outline-none transition focus:border-primary sm:w-auto sm:min-w-[200px]"
             />
-            <button type="submit" aria-label="Nhan tu van phap luat" className="rounded-full bg-primary px-8 py-3 text-[0.95rem] font-bold text-white transition hover:bg-primary-hover">
+            <button type="submit" aria-label="Nhận tư vấn pháp luật" className="rounded-full bg-primary px-8 py-3 text-[0.95rem] font-bold text-white transition hover:bg-primary-hover">
               Nhận tư vấn
             </button>
           </form>

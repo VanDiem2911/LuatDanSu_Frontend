@@ -5,12 +5,19 @@ import { BreadcrumbJsonLd } from "../components/JsonLd";
 import { ErrorState } from "../components/ErrorState";
 import { Loading } from "../components/Loading";
 import { Seo } from "../components/Seo";
-import { getPage } from "../services/cms";
+import { getPage, getStaticPageFallback } from "../services/cms";
+import { queryKeys } from "../services/queryKeys";
 import { optimizeHtmlImages } from "../utils/format";
 
 export function StaticPage({ slug }: { slug: string }) {
-  const page = useQuery({ queryKey: ["page", slug], queryFn: () => getPage(slug), staleTime: 5 * 60 * 1000 });
-  const pageContent = useMemo(() => optimizeHtmlImages(page.data?.content, 900), [page.data?.content]);
+  const page = useQuery({
+    queryKey: queryKeys.page(slug),
+    queryFn: () => getPage(slug),
+    initialData: getStaticPageFallback(slug),
+    initialDataUpdatedAt: 0,
+    staleTime: 5 * 60 * 1000
+  });
+  const pageContent = useMemo(() => optimizeHtmlImages(page.data?.content, 900, true), [page.data?.content]);
 
   if (page.isLoading) return <Loading variant="article" />;
   if (page.isError || !page.data) return <ErrorState title="Không tìm thấy trang" />;

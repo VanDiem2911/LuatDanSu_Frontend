@@ -110,3 +110,9 @@ export type NavigationPayload = {
   categories: Category[];
   settings: Setting[];
 };
+
+export type CategoryPagePayload = {
+  category: Category;
+  featuredArticles: Article[];
+  articles: Paginated<Article>;
+};

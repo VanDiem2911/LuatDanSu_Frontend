@@ -12,7 +12,7 @@ import { Sidebar } from "../components/Sidebar";
 import { ConsultBanner } from "../components/ConsultBanner";
 import { getArticles, getVideos, submitLead } from "../services/cms";
 import type { Article, Category, NavigationPayload, Video } from "../types/api";
-import { formatDate, optimizedImageUrl } from "../utils/format";
+import { formatDate, optimizedImageSrcSet, optimizedImageUrl } from "../utils/format";
 import { isValidPhone, PATTERNS, VALIDATION_MESSAGES } from "../utils/validation";
 
 function articleHref(article: Article) {
@@ -70,7 +70,7 @@ function ConsultationCard({ image: _image }: { image?: string }) {
         </p>
       </div>
       <div className="aspect-[16/10] w-full overflow-hidden bg-[#fcece2] rounded">
-        <img src="/lawyer.png" alt="Tư vấn luật" className="h-full w-full object-cover" loading="lazy" />
+        <img src="/lawyer.webp" alt="Tư vấn luật" width={640} height={366} className="h-full w-full object-cover" loading="lazy" decoding="async" />
       </div>
       <div className="flex flex-col gap-2.5">
         <Link
@@ -82,7 +82,7 @@ function ConsultationCard({ image: _image }: { image?: string }) {
         <a href="tel:0903601234" className="rounded-full border border-slate-200 py-2.5 text-xs font-black text-primary hover:bg-slate-50">
           Gọi 090 360 1234
         </a>
-        <p className="text-[0.65rem] font-black uppercase tracking-[0.18em] text-slate-400 mt-1">* Hỗ trợ 24/7, bảo mật</p>
+        <p className="mt-1 text-[0.65rem] font-black uppercase tracking-[0.18em] text-slate-600">* Hỗ trợ 24/7, bảo mật</p>
       </div>
     </aside>
   );
@@ -97,9 +97,13 @@ function HomeLeadArticle({ article, categories }: { article: Article; categories
           {article.image ? (
             <img
               src={optimizedImageUrl(article.image, 800)}
+              srcSet={optimizedImageSrcSet(article.image, [360, 480, 640, 800])}
               alt={article.title}
+              width={800}
+              height={350}
               fetchPriority="high"
               decoding="async"
+              sizes="(min-width: 1024px) 590px, calc(100vw - 32px)"
               className={`h-full w-full transition group-hover:scale-[1.02] ${
                 article.image.toLowerCase().includes("logo") ? "object-contain bg-white p-3" : "object-cover"
               }`}
@@ -125,13 +129,17 @@ function ThumbnailStrip({ articles, categories }: { articles: Article[]; categor
     <div className="grid gap-4 border-t border-slate-200 pt-5 sm:grid-cols-3">
       {articles.map((article) => (
         <Link key={article._id} to={articleHref(article)} className="group block">
-          <div className="aspect-[16/8] overflow-hidden bg-slate-100 flex items-center justify-center">
+          <div className="aspect-[16/9] overflow-hidden bg-slate-100 flex items-center justify-center">
             {article.image ? (
               <img
                 src={optimizedImageUrl(article.image, 400)}
+                srcSet={optimizedImageSrcSet(article.image, [240, 320, 400])}
                 alt={article.title}
+                width={400}
+                height={225}
                 loading="lazy"
                 decoding="async"
+                sizes="(min-width: 640px) 190px, calc(100vw - 32px)"
                 className={`h-full w-full transition group-hover:scale-105 ${
                   article.image.toLowerCase().includes("logo") ? "object-contain bg-white p-2" : "object-cover"
                 }`}
@@ -159,7 +167,7 @@ function FormMiniCard({ article, categories }: { article: Article; categories: C
         <FileText className="h-7 w-7" />
       </span>
       <span className="min-w-0">
-        <span className="text-[0.7rem] font-bold uppercase tracking-wide text-slate-400">
+        <span className="text-[0.7rem] font-bold uppercase tracking-wide text-slate-600">
           {categoryLabel(categories, article.categorySlug)}
         </span>
         <span className="mt-1 block line-clamp-2 text-sm font-black leading-5 text-slate-800 group-hover:text-primary">
@@ -178,9 +186,13 @@ function NewsRow({ article, categories }: { article: Article; categories: Catego
         {article.image ? (
           <img
             src={optimizedImageUrl(article.image, 320)}
+            srcSet={optimizedImageSrcSet(article.image, [240, 320, 480])}
             alt={article.title}
+            width={320}
+            height={200}
             loading="lazy"
             decoding="async"
+            sizes="(min-width: 640px) 210px, calc(100vw - 32px)"
             className={`h-full w-full transition group-hover:scale-105 ${
               article.image.toLowerCase().includes("logo") ? "object-contain bg-white p-2.5" : "object-cover"
             }`}
@@ -190,7 +202,7 @@ function NewsRow({ article, categories }: { article: Article; categories: Catego
       <div>
         <div className="mb-1 flex flex-wrap items-center gap-3 text-[0.7rem] font-bold uppercase tracking-wide text-primary">
           <span>{categoryLabel(categories, article.categorySlug)}</span>
-          <span className="flex items-center gap-1 text-slate-400">
+          <span className="flex items-center gap-1 text-slate-600">
             <Calendar className="h-3.5 w-3.5" />
             {formatDate(article.publishedAt ?? article.createdAt)}
           </span>
@@ -336,8 +348,11 @@ function VideoSection({ videos }: { videos: Video[] }) {
                 <img
                   src={`https://img.youtube.com/vi/${video.youtubeId}/hqdefault.jpg`}
                   alt={video.title}
+                  width={480}
+                  height={270}
                   className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105 pointer-events-none"
                   loading="lazy"
+                  decoding="async"
                 />
                 <div className="absolute inset-0 bg-navy/20 flex items-center justify-center opacity-90 group-hover:opacity-100 transition-opacity">
                   <span className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/95 text-white shadow-lg transition-transform duration-300 group-hover:scale-110">
@@ -374,7 +389,7 @@ function VideoSection({ videos }: { videos: Video[] }) {
             <button
               onClick={() => setActiveVideoId(null)}
               className="absolute top-4 right-4 flex h-9 w-9 items-center justify-center rounded-full bg-black/60 text-white hover:bg-primary transition hover:scale-105"
-              aria-label="Close video"
+              aria-label="Đóng video"
             >
               <X className="h-5 w-5" />
             </button>
@@ -395,8 +410,14 @@ function QuestionRows({ articles, categories }: { articles: Article[]; categorie
             <div className="flex h-12 w-12 items-center justify-center overflow-hidden bg-white text-navy border border-slate-100">
               {article.image ? (
                 <img
-                  src={article.image}
-                  alt=""
+                  src={optimizedImageUrl(article.image, 160)}
+                  srcSet={optimizedImageSrcSet(article.image, [80, 120, 160])}
+                  alt={article.title}
+                  width={64}
+                  height={48}
+                  loading="lazy"
+                  decoding="async"
+                  sizes="64px"
                   className={`h-full w-full ${
                     article.image.toLowerCase().includes("logo") ? "object-contain bg-white p-1" : "object-cover"
                   }`}
@@ -406,7 +427,7 @@ function QuestionRows({ articles, categories }: { articles: Article[]; categorie
               )}
             </div>
             <div>
-              <div className="mb-1 flex flex-wrap items-center gap-3 text-[0.68rem] font-bold uppercase tracking-wide text-slate-400">
+              <div className="mb-1 flex flex-wrap items-center gap-3 text-[0.68rem] font-bold uppercase tracking-wide text-slate-600">
                 <span>{categoryLabel(categories, article.categorySlug)}</span>
                 <span>{formatDate(article.publishedAt ?? article.createdAt)}</span>
               </div>

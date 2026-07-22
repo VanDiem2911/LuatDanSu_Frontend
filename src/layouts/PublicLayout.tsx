@@ -78,7 +78,7 @@ export function PublicLayout() {
               className="flex flex-shrink-0 items-center"
               aria-label={site.logoText}
             >
-              <img src="/logo.png" alt={site.logoText} width={168} height={48} decoding="async" className="h-12 w-auto object-contain" />
+              <img src="/logo.webp" alt={site.logoText} width={104} height={48} decoding="async" className="h-12 w-auto object-contain" />
             </a>
             <div className="flex flex-row items-center gap-5">
               <nav className="hidden lg:block">
@@ -113,22 +113,28 @@ export function PublicLayout() {
                     placeholder="Tìm kiếm..."
                     className="w-full border-none bg-transparent text-[0.85rem] text-slate-700 outline-none placeholder:text-slate-500 lg:text-[0.9rem]"
                   />
-                  <button type="submit" aria-label="Tim kiem" className="flex-shrink-0 rounded-full bg-primary p-1.5 text-white transition-colors hover:bg-primary-hover lg:p-2">
+                  <button type="submit" aria-label="Tìm kiếm" className="flex-shrink-0 rounded-full bg-primary p-1.5 text-white transition-colors hover:bg-primary-hover lg:p-2">
                     <Search className="h-4.5 w-4.5" />
                   </button>
                 </div>
               </form>
               <button
                 onClick={() => setMenuOpen(true)}
+                type="button"
                 className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 text-slate-700 hover:bg-slate-200 sm:hidden transition-colors"
-                aria-label="Mo tim kiem"
+                aria-label="Mở tìm kiếm"
+                aria-expanded={menuOpen}
+                aria-controls="mobile-navigation"
               >
                 <Search className="h-5 w-5" />
               </button>
               <button
                 onClick={() => setMenuOpen(true)}
+                type="button"
                 className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 text-slate-700 hover:bg-slate-200 lg:hidden transition-colors"
-                aria-label="Mo menu di dong"
+                aria-label="Mở menu di động"
+                aria-expanded={menuOpen}
+                aria-controls="mobile-navigation"
               >
                 <Menu className="h-6 w-6" />
               </button>
@@ -143,13 +149,13 @@ export function PublicLayout() {
         <div onClick={() => setMenuOpen(false)} className="absolute inset-0 bg-black/40 backdrop-blur-xs" />
         
         {/* Drawer Content */}
-        <div className={`absolute right-0 top-0 bottom-0 w-[280px] bg-white p-6 shadow-2xl flex flex-col gap-6 transition-transform duration-300 ${menuOpen ? "translate-x-0" : "translate-x-full"}`}>
+        <div id="mobile-navigation" className={`absolute right-0 top-0 bottom-0 w-[280px] bg-white p-6 shadow-2xl flex flex-col gap-6 transition-transform duration-300 ${menuOpen ? "translate-x-0" : "translate-x-full"}`}>
           <div className="flex items-center justify-between">
-            <span className="text-sm font-bold uppercase tracking-wider text-slate-400">Danh mục</span>
+            <span className="text-sm font-bold uppercase tracking-wider text-slate-600">Danh mục</span>
             <button
               type="button"
               onClick={() => setMenuOpen(false)}
-              aria-label="Dong menu di dong"
+              aria-label="Đóng menu di động"
               className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 transition-colors"
             >
               <X className="h-5 w-5" />
@@ -166,7 +172,7 @@ export function PublicLayout() {
                 placeholder="Tìm kiếm..."
                 className="w-full border-none bg-transparent text-sm text-slate-700 outline-none placeholder:text-slate-500"
               />
-              <button type="submit" aria-label="Tim kiem" className="flex-shrink-0 rounded-full bg-primary p-1.5 text-white transition-colors hover:bg-primary-hover">
+              <button type="submit" aria-label="Tìm kiếm" className="flex-shrink-0 rounded-full bg-primary p-1.5 text-white transition-colors hover:bg-primary-hover">
                 <Search className="h-4 w-4" />
               </button>
             </div>
@@ -198,7 +204,7 @@ export function PublicLayout() {
           </nav>
           
           <div className="border-t border-slate-100 pt-6">
-            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Liên hệ nhanh</p>
+            <p className="mb-2 text-xs font-bold uppercase tracking-wider text-slate-600">Liên hệ nhanh</p>
             <a href={`tel:${site.hotline.replace(/\s/g, "")}`} className="block font-black text-lg text-primary hover:text-primary-hover">
               {site.hotline}
             </a>
@@ -229,7 +235,7 @@ export function PublicLayout() {
             ))}
           </div>
           <div className="flex flex-col items-center justify-between gap-4 border-t border-slate-100 pt-6 lg:flex-row">
-            <p className="order-2 text-[0.8rem] font-medium text-slate-400 lg:order-1">
+            <p className="order-2 text-[0.8rem] font-medium text-slate-600 lg:order-1">
               © 2026 {site.name} - Hỗ trợ pháp lý toàn diện.
             </p>
             <div className="order-1 flex flex-wrap items-center justify-center gap-6 lg:order-2">

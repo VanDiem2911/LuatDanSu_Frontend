@@ -10,8 +10,9 @@ import { Loading } from "../components/Loading";
 import { Seo } from "../components/Seo";
 import { Sidebar } from "../components/Sidebar";
 import { getArticle } from "../services/cms";
+import { queryKeys } from "../services/queryKeys";
 import type { NavigationPayload } from "../types/api";
-import { formatDate, optimizedImageUrl, optimizeHtmlImages } from "../utils/format";
+import { formatDate, optimizedImageSrcSet, optimizedImageUrl, optimizeHtmlImages } from "../utils/format";
 
 const SITE_URL = "https://luatdansu.vercel.app";
 
@@ -19,7 +20,7 @@ export function ArticlePage() {
   const { categorySlug = "", articleSlug = "" } = useParams();
   const navigation = useOutletContext<NavigationPayload>();
   const article = useQuery({
-    queryKey: ["article", categorySlug, articleSlug],
+    queryKey: queryKeys.article(categorySlug, articleSlug),
     queryFn: () => getArticle(articleSlug, categorySlug),
     staleTime: 5 * 60 * 1000
   });
@@ -39,7 +40,7 @@ export function ArticlePage() {
       "@id": articleUrl
     },
     headline: article.data.title,
-    image: article.data.image ? [article.data.image] : [`${SITE_URL}/logo.png`],
+    image: article.data.image ? [article.data.image] : [`${SITE_URL}/logo.webp`],
     datePublished: article.data.publishedAt || article.data.createdAt,
     dateModified: article.data.updatedAt || article.data.publishedAt || article.data.createdAt,
     author: [{ "@type": "Organization", name: "Luật ANP", url: SITE_URL }],
@@ -49,7 +50,7 @@ export function ArticlePage() {
       url: SITE_URL,
       logo: {
         "@type": "ImageObject",
-        url: `${SITE_URL}/logo.png`
+        url: `${SITE_URL}/logo.webp`
       }
     },
     description: article.data.excerpt
@@ -102,6 +103,7 @@ export function ArticlePage() {
               <div className="mb-8 aspect-video w-full overflow-hidden flex items-center justify-center bg-slate-100">
                 <img
                   src={optimizedImageUrl(article.data.image, 800)}
+                  srcSet={optimizedImageSrcSet(article.data.image, [360, 480, 640, 800])}
                   alt={article.data.title}
                   width={800}
                   height={450}

@@ -8,10 +8,11 @@ import { ErrorState } from "../components/ErrorState";
 import { Loading } from "../components/Loading";
 import { Seo } from "../components/Seo";
 import { Sidebar } from "../components/Sidebar";
-import { getArticles, getCategory } from "../services/cms";
+import { getArticles, getCategoryPage } from "../services/cms";
+import { queryKeys } from "../services/queryKeys";
 import { ChevronRight, Play, Scale, Search, Zap } from "lucide-react";
 import type { Article, Category, NavigationPayload } from "../types/api";
-import { optimizedImageUrl } from "../utils/format";
+import { optimizedImageSrcSet, optimizedImageUrl } from "../utils/format";
 
 const headingCopy: Record<string, { title: string; description: string }> = {
   "tin-tuc": {
@@ -68,7 +69,7 @@ function ConsultationCard({ image: _image }: { image?: string }) {
         </p>
       </div>
       <div className="aspect-[16/10] w-full overflow-hidden bg-[#fcece2] rounded">
-        <img src="/lawyer.png" alt="Tư vấn luật" width={280} height={175} loading="lazy" decoding="async" className="h-full w-full object-cover" />
+        <img src="/lawyer.webp" alt="Tư vấn luật" width={640} height={366} loading="lazy" decoding="async" className="h-full w-full object-cover" />
       </div>
       <div className="flex flex-col gap-2.5">
         <Link to="/dang-ky-tu-van" className="rounded-full bg-primary py-2.5 text-xs font-black uppercase text-white shadow-md">
@@ -77,7 +78,7 @@ function ConsultationCard({ image: _image }: { image?: string }) {
         <a href="tel:0903601234" className="rounded-full border border-slate-200 py-2 text-xs font-black text-primary hover:bg-slate-50">
           Gọi 090 360 1234
         </a>
-        <p className="text-[0.65rem] font-black uppercase tracking-[0.16em] text-slate-400 mt-1">* Hỗ trợ 24/7, bảo mật</p>
+        <p className="mt-1 text-[0.65rem] font-black uppercase tracking-[0.16em] text-slate-600">* Hỗ trợ 24/7, bảo mật</p>
       </div>
     </aside>
   );
@@ -92,6 +93,7 @@ function TopStory({ article, category }: { article: Article; category: Category 
           {article.image ? (
             <img
               src={optimizedImageUrl(article.image, 800)}
+              srcSet={optimizedImageSrcSet(article.image, [360, 480, 640, 800])}
               alt={article.title}
               width={800}
               height={350}
@@ -125,6 +127,7 @@ function SmallFeatureGrid({ articles, category }: { articles: Article[]; categor
             {article.image ? (
               <img
                 src={optimizedImageUrl(article.image, 400)}
+                srcSet={optimizedImageSrcSet(article.image, [240, 320, 400])}
                 alt={article.title}
                 width={400}
                 height={225}
@@ -167,6 +170,7 @@ function ArticleRow({ article, category, question = false }: { article: Article;
         {article.image ? (
           <img
             src={optimizedImageUrl(article.image, 320)}
+            srcSet={optimizedImageSrcSet(article.image, [240, 320, 480])}
             alt={article.title}
             width={320}
             height={200}
@@ -220,18 +224,18 @@ function SidebarColumn({
           className="w-full bg-transparent px-3 py-3 text-sm outline-none"
           placeholder="Tìm kiếm bài viết..."
         />
-        <button type="submit" aria-label="Tim kiem bai viet" className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full text-slate-400 hover:bg-slate-100 hover:text-primary">
+        <button type="submit" aria-label="Tìm kiếm bài viết" className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full text-slate-600 hover:bg-slate-100 hover:text-primary">
           <Search className="h-4 w-4" />
         </button>
         {search ? (
           <button
             type="button"
-            aria-label="Xoa bo loc tim kiem"
+            aria-label="Xóa bộ lọc tìm kiếm"
             onClick={() => {
               setQuery("");
               onSearch("");
             }}
-            className="text-xs font-bold text-slate-400 hover:text-slate-600 ml-2 whitespace-nowrap"
+            className="ml-2 whitespace-nowrap text-xs font-bold text-slate-600 hover:text-slate-800"
           >
             Xóa
           </button>
@@ -251,8 +255,8 @@ function Pagination({ page, totalPages, onChange }: { page: number; totalPages: 
         type="button"
         disabled={page <= 1}
         onClick={() => onChange(page - 1)}
-        aria-label="Trang truoc"
-        className="h-8 w-8 rounded-full border border-slate-200 bg-white text-slate-400 disabled:opacity-50"
+        aria-label="Trang trước"
+        className="h-8 w-8 rounded-full border border-slate-200 bg-white text-slate-600 disabled:opacity-50"
       >
         ‹
       </button>
@@ -268,13 +272,13 @@ function Pagination({ page, totalPages, onChange }: { page: number; totalPages: 
           {item}
         </button>
       ))}
-      {totalPages > 5 ? <span className="text-slate-400">...</span> : null}
+      {totalPages > 5 ? <span className="text-slate-600">...</span> : null}
       <button
         type="button"
         disabled={page >= totalPages}
         onClick={() => onChange(page + 1)}
         aria-label="Trang sau"
-        className="h-8 w-8 rounded-full border border-slate-200 bg-white text-slate-400 disabled:opacity-50"
+        className="h-8 w-8 rounded-full border border-slate-200 bg-white text-slate-600 disabled:opacity-50"
       >
         ›
       </button>
@@ -291,7 +295,12 @@ export function CategoryPage() {
   
   const [search, setSearch] = useState("");
   const navigation = useOutletContext<NavigationPayload>();
-  const category = useQuery({ queryKey: ["category", categorySlug], queryFn: () => getCategory(categorySlug), staleTime: 5 * 60 * 1000 });
+  const categoryPage = useQuery({
+    queryKey: queryKeys.categoryPage(categorySlug),
+    queryFn: () => getCategoryPage(categorySlug),
+    enabled: Boolean(categorySlug),
+    staleTime: 5 * 60 * 1000
+  });
 
   useEffect(() => {
     setSearch("");
@@ -308,16 +317,11 @@ export function CategoryPage() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  const featureArticles = useQuery({
-    queryKey: ["articles", categorySlug, "feature"],
-    queryFn: () => getArticles({ categorySlug, limit: 12, sort: "publishedAt", order: "desc" }),
-    enabled: Boolean(categorySlug),
-    staleTime: 5 * 60 * 1000
-  });
-  const articles = useQuery({
+  const shouldLoadSeparateList = page > 1 || Boolean(search);
+  const articleList = useQuery({
     queryKey: ["articles", categorySlug, "list", page, search],
     queryFn: () => getArticles({ categorySlug, page, limit: 9, sort: "publishedAt", order: "desc", search }),
-    enabled: Boolean(categorySlug),
+    enabled: Boolean(categorySlug) && shouldLoadSeparateList,
     placeholderData: (previousData) => previousData,
     staleTime: 5 * 60 * 1000
   });
@@ -326,25 +330,29 @@ export function CategoryPage() {
   const isQuestionPage = categorySlug === "hoi-dap";
   const hasActiveSearch = Boolean(search);
   const hideTopSection = categorySlug === "hoi-dap" || categorySlug === "bieu-mau" || hasActiveSearch;
-  const feature = featureArticles.data?.data ?? [];
+  const feature = categoryPage.data?.featuredArticles ?? [];
   const lead = feature[0];
   const thumbnails = useMemo(() => feature.slice(1, 4), [feature]);
   const headlines = useMemo(() => feature.slice(4, 11), [feature]);
+  const activeArticles = shouldLoadSeparateList ? articleList.data : categoryPage.data?.articles;
+  const articlesLoading = shouldLoadSeparateList ? articleList.isLoading : categoryPage.isLoading;
+  const articlesError = shouldLoadSeparateList ? articleList.isError : categoryPage.isError;
 
-  if (category.isLoading) return <Loading variant="page" />;
-  if (category.isError || !category.data) return <ErrorState title="Không tìm thấy chuyên mục" />;
+  if (categoryPage.isLoading) return <Loading variant="page" />;
+  if (categoryPage.isError || !categoryPage.data) return <ErrorState title="Không tìm thấy chuyên mục" />;
 
-  const title = copy?.title ?? category.data.name;
-  const description = copy?.description ?? category.data.description;
+  const category = categoryPage.data.category;
+  const title = copy?.title ?? category.name;
+  const description = copy?.description ?? category.description;
 
-  const breadcrumbItems = [{ label: title, href: `/${category.data.slug}` }];
-  const faqItems = isQuestionPage && articles.data?.data
-    ? articles.data.data.map((art) => ({ question: art.title, answer: art.excerpt || art.title }))
+  const breadcrumbItems = [{ label: title, href: `/${category.slug}` }];
+  const faqItems = isQuestionPage && activeArticles?.data
+    ? activeArticles.data.map((art) => ({ question: art.title, answer: art.excerpt || art.title }))
     : [];
 
   return (
     <>
-      <Seo title={category.data.seo?.metaTitle ?? `${title} | Luật Dân Sự`} description={category.data.seo?.metaDescription ?? description} />
+      <Seo title={category.seo?.metaTitle ?? `${title} | Luật Dân Sự`} description={category.seo?.metaDescription ?? description} />
       <BreadcrumbJsonLd items={breadcrumbItems} />
       <FaqJsonLd questions={faqItems} />
 
@@ -363,12 +371,12 @@ export function CategoryPage() {
           <section className="mb-14 grid min-h-[650px] grid-cols-1 gap-8 lg:grid-cols-[1.55fr_0.7fr_0.8fr]">
             <div>
               {lead ? (
-                <TopStory article={lead} category={category.data} />
+                <TopStory article={lead} category={category} />
               ) : (
                 <div className="aspect-[16/7] w-full skeleton-block rounded mb-4" />
               )}
               {thumbnails.length > 0 ? (
-                <SmallFeatureGrid articles={thumbnails} category={category.data} />
+                <SmallFeatureGrid articles={thumbnails} category={category} />
               ) : (
                 <div className="grid gap-4 border-t border-slate-200 pt-5 sm:grid-cols-3">
                   <div className="aspect-[16/9] skeleton-block rounded" />
@@ -377,7 +385,7 @@ export function CategoryPage() {
                 </div>
               )}
             </div>
-            <HeadlineList articles={headlines} category={category.data} />
+            <HeadlineList articles={headlines} category={category} />
             <ConsultationCard />
           </section>
         ) : null}
@@ -391,18 +399,18 @@ export function CategoryPage() {
             ) : hasActiveSearch ? (
               <h2 className="section-title mb-8 text-[1.35rem]">Kết quả tìm kiếm cho: "{search}"</h2>
             ) : null}
-            {articles.isLoading ? (
+            {articlesLoading ? (
               <Loading />
-            ) : articles.isError ? (
+            ) : articlesError ? (
               <ErrorState />
             ) : (
               <>
                 <div>
-                  {articles.data?.data.map((article) => (
-                    <ArticleRow key={article._id} article={article} category={category.data} question={isQuestionPage} />
+                  {activeArticles?.data.map((article) => (
+                    <ArticleRow key={article._id} article={article} category={category} question={isQuestionPage} />
                   ))}
                 </div>
-                <Pagination page={page} totalPages={articles.data?.meta.totalPages ?? 1} onChange={handlePageChange} />
+                <Pagination page={page} totalPages={activeArticles?.meta.totalPages ?? 1} onChange={handlePageChange} />
               </>
             )}
           </div>

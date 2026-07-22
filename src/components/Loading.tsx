@@ -3,6 +3,7 @@ type LoadingVariant = "page" | "hero" | "list" | "cards" | "article" | "compact"
 type LoadingProps = {
   label?: string;
   variant?: LoadingVariant;
+  count?: number;
 };
 
 function Block({ className }: { className: string }) {
@@ -61,7 +62,7 @@ function CardGrid() {
 
 function HeroFrame() {
   return (
-    <div className="grid min-h-[650px] gap-8 lg:grid-cols-[1.65fr_0.72fr_0.82fr]">
+    <div className="grid min-h-[650px] gap-8 lg:grid-cols-[1.55fr_0.7fr_0.8fr]">
       <div>
         <Block className="aspect-[16/7] w-full rounded-sm" />
         <div className="space-y-3 py-5">
@@ -84,7 +85,7 @@ function HeroFrame() {
         <Block className="mx-auto h-12 w-12 rounded-full" />
         <Block className="mx-auto mt-5 h-5 w-3/4 rounded" />
         <Block className="mx-auto mt-3 h-3 w-full rounded" />
-        <Block className="mt-6 aspect-[4/5] w-full rounded-sm" />
+        <Block className="mt-6 aspect-[16/10] w-full rounded-sm" />
         <Block className="mt-5 h-10 w-full rounded-full" />
       </div>
     </div>
@@ -153,7 +154,7 @@ function PageFrame() {
   );
 }
 
-export function Loading({ label = "Đang tải dữ liệu", variant = "list" }: LoadingProps) {
+export function Loading({ label = "Đang tải dữ liệu", variant = "list", count }: LoadingProps) {
   let frame;
 
   switch (variant) {
@@ -170,7 +171,7 @@ export function Loading({ label = "Đang tải dữ liệu", variant = "list" }:
       frame = <ArticleFrame />;
       break;
     case "compact":
-      frame = <CompactRows count={4} />;
+      frame = <CompactRows count={count ?? 4} />;
       break;
     case "table":
       frame = <TableFrame />;

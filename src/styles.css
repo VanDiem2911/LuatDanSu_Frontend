@@ -20,7 +20,7 @@ h1, h2, h3, h4, h5, h6, p, a, span, li, article {
 html, body {
   margin: 0;
   min-height: 100vh;
-  font-family: Inter, Arial, sans-serif;
+  font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   background: #f8fafc;
   overflow-x: hidden;
   max-width: 100%;
@@ -108,19 +108,18 @@ html, body {
   animation-play-state: paused;
 }
 
-@keyframes skeleton-shimmer {
-  0% {
-    background-position: 200% 0;
+@keyframes skeleton-pulse {
+  0%, 100% {
+    opacity: 0.58;
   }
-  100% {
-    background-position: -200% 0;
+  50% {
+    opacity: 1;
   }
 }
 
 .skeleton-block {
-  background: linear-gradient(90deg, #e8edf4 25%, #f7f9fc 42%, #e8edf4 62%);
-  background-size: 300% 100%;
-  animation: skeleton-shimmer 1.6s ease-in-out infinite;
+  background: #e8edf4;
+  animation: skeleton-pulse 1.4s ease-in-out infinite;
 }
 
 @media (prefers-reduced-motion: reduce) {

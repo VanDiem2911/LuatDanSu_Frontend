@@ -1,15 +1,16 @@
 import { Calendar, ChevronRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import type { Article, Category } from "../types/api";
-import { formatDate, optimizedImageUrl } from "../utils/format";
+import { formatDate, optimizedImageSrcSet, optimizedImageUrl } from "../utils/format";
 
 type Props = {
   article: Article;
   category?: Category;
   compact?: boolean;
+  priority?: boolean;
 };
 
-export function ArticleCard({ article, category, compact = false }: Props) {
+export function ArticleCard({ article, category, compact = false, priority = false }: Props) {
   const href = `/${article.categorySlug}/${article.slug || article._id}`;
 
   if (compact) {
@@ -19,6 +20,7 @@ export function ArticleCard({ article, category, compact = false }: Props) {
           {article.image ? (
             <img
               src={optimizedImageUrl(article.image, 160)}
+              srcSet={optimizedImageSrcSet(article.image, [80, 120, 160])}
               alt={article.title}
               width={80}
               height={64}
@@ -35,7 +37,7 @@ export function ArticleCard({ article, category, compact = false }: Props) {
           <h3 className="line-clamp-2 text-sm font-bold leading-5 text-slate-800 group-hover:text-primary">
             {article.title}
           </h3>
-          <p className="mt-1 text-xs text-slate-400">{formatDate(article.publishedAt ?? article.createdAt)}</p>
+          <p className="mt-1 text-xs text-slate-600">{formatDate(article.publishedAt ?? article.createdAt)}</p>
         </div>
       </Link>
     );
@@ -48,11 +50,13 @@ export function ArticleCard({ article, category, compact = false }: Props) {
           {article.image ? (
             <img
               src={optimizedImageUrl(article.image, 400)}
+              srcSet={optimizedImageSrcSet(article.image, [280, 320, 400, 640])}
               alt={article.title}
               width={400}
               height={225}
               decoding="async"
-              loading="lazy"
+              loading={priority ? "eager" : "lazy"}
+              fetchPriority={priority ? "high" : undefined}
               sizes="(min-width: 1024px) 400px, (min-width: 768px) 50vw, calc(100vw - 32px)"
               className={`h-full w-full transition-transform duration-300 group-hover:scale-105 ${
                 article.image.toLowerCase().includes("logo") ? "object-contain bg-white p-3" : "object-cover"
@@ -63,7 +67,7 @@ export function ArticleCard({ article, category, compact = false }: Props) {
         <div className="border border-t-0 border-slate-100 p-5">
           <div className="mb-3 flex flex-wrap items-center gap-3 text-xs font-bold uppercase tracking-wider text-primary">
             <span>{category?.name ?? article.categorySlug}</span>
-            <span className="flex items-center gap-1 text-slate-400">
+            <span className="flex items-center gap-1 text-slate-600">
               <Calendar className="h-3.5 w-3.5" />
               {formatDate(article.publishedAt ?? article.createdAt)}
             </span>
