@@ -3,4 +3,6 @@ Allow: /
 Disallow: /admin
 Disallow: /tim-kiem
 
-Sitemap: /sitemap.xml
+Sitemap: https://luatdansu.vercel.app/api/public/sitemap.xml
+Sitemap: https://luatdansu.vercel.app/sitemap.xml
+

@@ -1,7 +1,8 @@
 import { FormEvent, useEffect, useMemo, useState } from "react";
-import { Link, useOutletContext, useParams, useNavigate } from "react-router-dom";
+import { Link, useOutletContext, useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { Breadcrumb } from "../components/Breadcrumb";
+import { BreadcrumbJsonLd, FaqJsonLd } from "../components/JsonLd";
 import { ConsultBanner } from "../components/ConsultBanner";
 import { ErrorState } from "../components/ErrorState";
 import { Loading } from "../components/Loading";
@@ -90,7 +91,7 @@ function TopStory({ article, category }: { article: Article; category: Category 
           {article.image ? (
             <img
               src={article.image}
-              alt=""
+              alt={article.title}
               className={`h-full w-full transition group-hover:scale-[1.02] ${
                 article.image.toLowerCase().includes("logo") ? "object-contain bg-white p-3" : "object-cover"
               }`}
@@ -118,7 +119,7 @@ function SmallFeatureGrid({ articles, category }: { articles: Article[]; categor
             {article.image ? (
               <img
                 src={article.image}
-                alt=""
+                alt={article.title}
                 className={`h-full w-full transition group-hover:scale-105 ${
                   article.image.toLowerCase().includes("logo") ? "object-contain bg-white p-2" : "object-cover"
                 }`}
@@ -155,7 +156,7 @@ function ArticleRow({ article, category, question = false }: { article: Article;
         {article.image ? (
           <img
             src={article.image}
-            alt=""
+            alt={article.title}
             className={`h-full w-full transition group-hover:scale-105 ${
               article.image.toLowerCase().includes("logo") ? "object-contain bg-white p-2.5" : "object-cover"
             }`}
@@ -249,15 +250,29 @@ function Pagination({ page, totalPages, onChange }: { page: number; totalPages: 
 
 export function CategoryPage() {
   const { categorySlug = "" } = useParams();
-  const [page, setPage] = useState(1);
+  const [searchParams, setSearchParams] = useSearchParams();
+  
+  const pageParam = parseInt(searchParams.get("page") || "1", 10);
+  const page = isNaN(pageParam) || pageParam < 1 ? 1 : pageParam;
+  
   const [search, setSearch] = useState("");
   const navigation = useOutletContext<NavigationPayload>();
   const category = useQuery({ queryKey: ["category", categorySlug], queryFn: () => getCategory(categorySlug) });
 
   useEffect(() => {
     setSearch("");
-    setPage(1);
   }, [categorySlug]);
+
+  const handlePageChange = (newPage: number) => {
+    const nextParams = new URLSearchParams(searchParams);
+    if (newPage > 1) {
+      nextParams.set("page", newPage.toString());
+    } else {
+      nextParams.delete("page");
+    }
+    setSearchParams(nextParams);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
 
   const featureArticles = useQuery({
     queryKey: ["articles", categorySlug, "feature"],
@@ -286,12 +301,20 @@ export function CategoryPage() {
   const title = copy?.title ?? category.data.name;
   const description = copy?.description ?? category.data.description;
 
+  const breadcrumbItems = [{ label: title, href: `/${category.data.slug}` }];
+  const faqItems = isQuestionPage && articles.data?.data
+    ? articles.data.data.map((art) => ({ question: art.title, answer: art.excerpt || art.title }))
+    : [];
+
   return (
     <>
       <Seo title={category.data.seo?.metaTitle ?? `${title} | Luật Dân Sự`} description={category.data.seo?.metaDescription ?? description} />
+      <BreadcrumbJsonLd items={breadcrumbItems} />
+      <FaqJsonLd questions={faqItems} />
+
       <div className="border-b border-slate-200 bg-white pb-12 pt-8">
         <div className="container-page">
-          <Breadcrumb items={[{ label: title, href: `/${category.data.slug}` }]} />
+          <Breadcrumb items={breadcrumbItems} />
           <div className="max-w-3xl">
             <h1 className="mb-4 text-3xl font-black leading-tight tracking-tight text-ink sm:text-4xl md:text-5xl">{title}</h1>
             <p className="max-w-2xl text-base font-medium leading-relaxed text-slate-500 sm:text-lg">{description}</p>
@@ -331,11 +354,11 @@ export function CategoryPage() {
                     <ArticleRow key={article._id} article={article} category={category.data} question={isQuestionPage} />
                   ))}
                 </div>
-                <Pagination page={page} totalPages={articles.data?.meta.totalPages ?? 1} onChange={setPage} />
+                <Pagination page={page} totalPages={articles.data?.meta.totalPages ?? 1} onChange={handlePageChange} />
               </>
             )}
           </div>
-          <SidebarColumn categories={navigation.categories} search={search} onSearch={(val) => { setSearch(val); setPage(1); }} />
+          <SidebarColumn categories={navigation.categories} search={search} onSearch={(val) => { setSearch(val); handlePageChange(1); }} />
         </section>
       </main>
       <ConsultBanner />

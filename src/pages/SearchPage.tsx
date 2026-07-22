@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "react-router-dom";
 import { ArticleCard } from "../components/ArticleCard";
 import { Breadcrumb } from "../components/Breadcrumb";
+import { BreadcrumbJsonLd } from "../components/JsonLd";
 import { ErrorState } from "../components/ErrorState";
 import { Loading } from "../components/Loading";
 import { Seo } from "../components/Seo";
@@ -18,7 +19,8 @@ export function SearchPage() {
 
   return (
     <>
-      <Seo title={`Tìm kiếm ${q ? `"${q}"` : ""} | Luật Dân Sự`} />
+      <Seo title={`Tìm kiếm ${q ? `"${q}"` : ""} | Luật Dân Sự`} noindex={true} />
+      <BreadcrumbJsonLd items={[{ label: "Tìm kiếm" }]} />
       <main className="container-page py-10">
         <Breadcrumb items={[{ label: "Tìm kiếm" }]} />
         <h1 className="mb-6 text-4xl font-bold text-ink">Tìm kiếm</h1>

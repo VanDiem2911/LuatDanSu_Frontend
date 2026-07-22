@@ -1,7 +1,9 @@
 import { Calendar, Tag, User, FileText } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { useOutletContext, useParams } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
 import { Breadcrumb } from "../components/Breadcrumb";
+import { BreadcrumbJsonLd } from "../components/JsonLd";
 import { ErrorState } from "../components/ErrorState";
 import { Loading } from "../components/Loading";
 import { Seo } from "../components/Seo";
@@ -9,6 +11,8 @@ import { Sidebar } from "../components/Sidebar";
 import { getArticle } from "../services/cms";
 import type { NavigationPayload } from "../types/api";
 import { formatDate } from "../utils/format";
+
+const SITE_URL = "https://luatdansu.vercel.app";
 
 export function ArticlePage() {
   const { categorySlug = "", articleSlug = "" } = useParams();
@@ -22,17 +26,36 @@ export function ArticlePage() {
   if (article.isError || !article.data) return <ErrorState title="Không tìm thấy bài viết" />;
 
   const category = navigation.categories.find((item) => item.slug === article.data.categorySlug);
+  const articleUrl = `${SITE_URL}/${article.data.categorySlug}/${article.data.slug || article.data._id}`;
+
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "NewsArticle",
+    mainEntityOfPage: {
+      "@type": "WebPage",
+      "@id": articleUrl
+    },
     headline: article.data.title,
-    image: article.data.image ? [article.data.image] : [],
-    datePublished: article.data.publishedAt,
-    dateModified: article.data.updatedAt,
-    author: [{ "@type": "Organization", name: "Luật Dân Sự - Luật ANP" }],
-    publisher: { "@type": "Organization", name: "Luật Dân Sự - Luật ANP" },
+    image: article.data.image ? [article.data.image] : [`${SITE_URL}/logo.png`],
+    datePublished: article.data.publishedAt || article.data.createdAt,
+    dateModified: article.data.updatedAt || article.data.publishedAt || article.data.createdAt,
+    author: [{ "@type": "Organization", name: "Luật ANP", url: SITE_URL }],
+    publisher: {
+      "@type": "Organization",
+      name: "Luật Dân Sự - Luật ANP",
+      url: SITE_URL,
+      logo: {
+        "@type": "ImageObject",
+        url: `${SITE_URL}/logo.png`
+      }
+    },
     description: article.data.excerpt
   };
+
+  const breadcrumbItems = [
+    { label: category?.name ?? article.data.categorySlug, href: `/${article.data.categorySlug}` },
+    { label: article.data.title }
+  ];
 
   return (
     <>
@@ -42,15 +65,13 @@ export function ArticlePage() {
         image={article.data.image}
         type="article"
       />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <BreadcrumbJsonLd items={breadcrumbItems} />
+      <Helmet>
+        <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>
+      </Helmet>
       <div className="border-b border-slate-100 bg-white py-8">
         <div className="container-page">
-          <Breadcrumb
-            items={[
-              { label: category?.name ?? article.data.categorySlug, href: `/${article.data.categorySlug}` },
-              { label: article.data.title }
-            ]}
-          />
+          <Breadcrumb items={breadcrumbItems} />
           <h1 className="mb-6 text-3xl font-bold leading-tight text-ink md:text-5xl">{article.data.title}</h1>
           <div className="flex flex-wrap items-center gap-6 text-[0.9rem] text-slate-500">
             <span className="flex items-center gap-2">

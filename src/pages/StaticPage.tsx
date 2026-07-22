@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { Breadcrumb } from "../components/Breadcrumb";
+import { BreadcrumbJsonLd } from "../components/JsonLd";
 import { ErrorState } from "../components/ErrorState";
 import { Loading } from "../components/Loading";
 import { Seo } from "../components/Seo";
@@ -14,6 +15,7 @@ export function StaticPage({ slug }: { slug: string }) {
   return (
     <>
       <Seo title={page.data.seo?.metaTitle ?? `${page.data.title} | Luật Dân Sự`} description={page.data.excerpt} />
+      <BreadcrumbJsonLd items={[{ label: page.data.title }]} />
       <main className="container-page py-10">
         <Breadcrumb items={[{ label: page.data.title }]} />
         <article className="max-w-3xl bg-white p-8">

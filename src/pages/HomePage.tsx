@@ -7,6 +7,7 @@ import { ErrorState } from "../components/ErrorState";
 import { LeadForms } from "../components/LeadForms";
 import { Loading } from "../components/Loading";
 import { Seo } from "../components/Seo";
+import { OrganizationJsonLd } from "../components/JsonLd";
 import { Sidebar } from "../components/Sidebar";
 import { ConsultBanner } from "../components/ConsultBanner";
 import { getArticles, getVideos, submitLead } from "../services/cms";
@@ -126,7 +127,7 @@ function ThumbnailStrip({ articles, categories }: { articles: Article[]; categor
             {article.image ? (
               <img
                 src={article.image}
-                alt=""
+                alt={article.title}
                 className={`h-full w-full transition group-hover:scale-105 ${
                   article.image.toLowerCase().includes("logo") ? "object-contain bg-white p-2" : "object-cover"
                 }`}
@@ -173,7 +174,7 @@ function NewsRow({ article, categories }: { article: Article; categories: Catego
         {article.image ? (
           <img
             src={article.image}
-            alt=""
+            alt={article.title}
             className={`h-full w-full transition group-hover:scale-105 ${
               article.image.toLowerCase().includes("logo") ? "object-contain bg-white p-2.5" : "object-cover"
             }`}
@@ -455,6 +456,7 @@ export function HomePage() {
   return (
     <>
       <Seo title="Luật Dân Sự - Cổng thông tin pháp luật | Luật ANP" />
+      <OrganizationJsonLd />
       <main className="container-page">
         <div className="mb-12 border-b border-slate-200 pb-6 pt-10 md:pt-12">
           <h1 className="max-w-none text-[2rem] font-black uppercase leading-tight text-navy md:text-[2.45rem]">

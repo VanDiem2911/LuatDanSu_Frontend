@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url><loc>/</loc><changefreq>daily</changefreq><priority>1.0</priority></url>
-  <url><loc>/tin-tuc</loc><changefreq>daily</changefreq><priority>0.8</priority></url>
-  <url><loc>/bieu-mau</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
-  <url><loc>/hoi-dap</loc><changefreq>daily</changefreq><priority>0.8</priority></url>
-  <url><loc>/ly-hon</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
-  <url><loc>/dat-dai</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
-  <url><loc>/thua-ke</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
-  <url><loc>/gioi-thieu</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
-  <url><loc>/lien-he</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://luatdansu.vercel.app/</loc><changefreq>daily</changefreq><priority>1.0</priority></url>
+  <url><loc>https://luatdansu.vercel.app/tin-tuc</loc><changefreq>daily</changefreq><priority>0.8</priority></url>
+  <url><loc>https://luatdansu.vercel.app/bieu-mau</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://luatdansu.vercel.app/hoi-dap</loc><changefreq>daily</changefreq><priority>0.8</priority></url>
+  <url><loc>https://luatdansu.vercel.app/ly-hon</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://luatdansu.vercel.app/dat-dai</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://luatdansu.vercel.app/thua-ke</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://luatdansu.vercel.app/gioi-thieu</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://luatdansu.vercel.app/lien-he</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
 </urlset>
+

@@ -4,6 +4,7 @@ import { MessageSquare, Phone, Send, Smartphone, MapPin, Mail, PhoneCall } from 
 import { toast } from "sonner";
 import { submitLead, submitQuestion } from "../services/cms";
 import { Breadcrumb } from "../components/Breadcrumb";
+import { BreadcrumbJsonLd } from "../components/JsonLd";
 import { Seo } from "../components/Seo";
 import type { NavigationPayload } from "../types/api";
 import { settingValue } from "../utils/format";
@@ -97,6 +98,7 @@ export function ContactPage() {
   return (
     <>
       <Seo title="Đăng ký tư vấn miễn phí & Liên hệ | Luật ANP" description="Kết nối Luật sư tư vấn pháp luật trực tuyến, gửi câu hỏi hoặc đăng ký nhận cuộc gọi tư vấn miễn phí nhanh chóng." />
+      <BreadcrumbJsonLd items={[{ label: "Đăng ký tư vấn & Liên hệ" }]} />
       <div className="border-b border-slate-200 bg-white pb-10 pt-6">
         <div className="container-page">
           <Breadcrumb items={[{ label: "Đăng ký tư vấn & Liên hệ" }]} />
