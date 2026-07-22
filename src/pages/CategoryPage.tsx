@@ -338,11 +338,23 @@ export function CategoryPage() {
       </div>
 
       <main className="container-page py-14">
-        {!hideTopSection && lead ? (
+        {!hideTopSection ? (
           <section className="mb-14 grid grid-cols-1 gap-8 lg:grid-cols-[1.55fr_0.7fr_0.8fr]">
             <div>
-              <TopStory article={lead} category={category.data} />
-              <SmallFeatureGrid articles={thumbnails} category={category.data} />
+              {lead ? (
+                <TopStory article={lead} category={category.data} />
+              ) : (
+                <div className="aspect-[16/7] w-full skeleton-block rounded mb-4" />
+              )}
+              {thumbnails.length > 0 ? (
+                <SmallFeatureGrid articles={thumbnails} category={category.data} />
+              ) : (
+                <div className="grid gap-4 border-t border-slate-200 pt-5 sm:grid-cols-3">
+                  <div className="aspect-[16/8] skeleton-block rounded" />
+                  <div className="aspect-[16/8] skeleton-block rounded" />
+                  <div className="aspect-[16/8] skeleton-block rounded" />
+                </div>
+              )}
             </div>
             <HeadlineList articles={headlines} category={category.data} />
             <ConsultationCard />
