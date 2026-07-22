@@ -269,7 +269,7 @@ export function CategoryPage() {
   
   const [search, setSearch] = useState("");
   const navigation = useOutletContext<NavigationPayload>();
-  const category = useQuery({ queryKey: ["category", categorySlug], queryFn: () => getCategory(categorySlug) });
+  const category = useQuery({ queryKey: ["category", categorySlug], queryFn: () => getCategory(categorySlug), staleTime: 5 * 60 * 1000 });
 
   useEffect(() => {
     setSearch("");
@@ -289,13 +289,15 @@ export function CategoryPage() {
   const featureArticles = useQuery({
     queryKey: ["articles", categorySlug, "feature"],
     queryFn: () => getArticles({ categorySlug, limit: 12, sort: "publishedAt", order: "desc" }),
-    enabled: Boolean(categorySlug)
+    enabled: Boolean(categorySlug),
+    staleTime: 5 * 60 * 1000
   });
   const articles = useQuery({
     queryKey: ["articles", categorySlug, "list", page, search],
     queryFn: () => getArticles({ categorySlug, page, limit: 9, sort: "publishedAt", order: "desc", search }),
     enabled: Boolean(categorySlug),
-    placeholderData: (previousData) => previousData
+    placeholderData: (previousData) => previousData,
+    staleTime: 5 * 60 * 1000
   });
 
   const copy = headingCopy[categorySlug];

@@ -8,12 +8,14 @@ import { Loading } from "./Loading";
 export function Sidebar({ categories }: { categories: Category[] }) {
   const popular = useQuery({
     queryKey: ["popular-articles"],
-    queryFn: () => getArticles({ limit: 5, sort: "views", order: "desc" })
+    queryFn: () => getArticles({ limit: 5, sort: "views", order: "desc" }),
+    staleTime: 10 * 60 * 1000
   });
 
   const questions = useQuery({
     queryKey: ["question-articles"],
-    queryFn: () => getArticles({ limit: 4, categorySlug: "hoi-dap" })
+    queryFn: () => getArticles({ limit: 4, categorySlug: "hoi-dap" }),
+    staleTime: 10 * 60 * 1000
   });
 
   return (

@@ -19,7 +19,8 @@ export function ArticlePage() {
   const navigation = useOutletContext<NavigationPayload>();
   const article = useQuery({
     queryKey: ["article", categorySlug, articleSlug],
-    queryFn: () => getArticle(articleSlug, categorySlug)
+    queryFn: () => getArticle(articleSlug, categorySlug),
+    staleTime: 5 * 60 * 1000
   });
 
   if (article.isLoading) return <Loading variant="article" />;
