@@ -98,6 +98,8 @@ function HomeLeadArticle({ article, categories }: { article: Article; categories
             <img
               src={article.image}
               alt={article.title}
+              fetchPriority="high"
+              decoding="async"
               className={`h-full w-full transition group-hover:scale-[1.02] ${
                 article.image.toLowerCase().includes("logo") ? "object-contain bg-white p-3" : "object-cover"
               }`}
@@ -128,6 +130,8 @@ function ThumbnailStrip({ articles, categories }: { articles: Article[]; categor
               <img
                 src={article.image}
                 alt={article.title}
+                loading="lazy"
+                decoding="async"
                 className={`h-full w-full transition group-hover:scale-105 ${
                   article.image.toLowerCase().includes("logo") ? "object-contain bg-white p-2" : "object-cover"
                 }`}
@@ -175,6 +179,8 @@ function NewsRow({ article, categories }: { article: Article; categories: Catego
           <img
             src={article.image}
             alt={article.title}
+            loading="lazy"
+            decoding="async"
             className={`h-full w-full transition group-hover:scale-105 ${
               article.image.toLowerCase().includes("logo") ? "object-contain bg-white p-2.5" : "object-cover"
             }`}
