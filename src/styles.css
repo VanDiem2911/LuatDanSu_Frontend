@@ -61,6 +61,20 @@ html, body {
   @apply mb-5;
 }
 
+.prose-content img {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  background: #f1f5f9;
+}
+
+.prose-content img.content-image {
+  margin: 1.75rem 0;
+}
+
 .line-clamp-2 {
   display: -webkit-box;
   -webkit-line-clamp: 2;

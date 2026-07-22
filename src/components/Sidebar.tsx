@@ -9,12 +9,14 @@ export function Sidebar({ categories }: { categories: Category[] }) {
   const popular = useQuery({
     queryKey: ["popular-articles"],
     queryFn: () => getArticles({ limit: 5, sort: "views", order: "desc" }),
+    placeholderData: (previousData) => previousData,
     staleTime: 10 * 60 * 1000
   });
 
   const questions = useQuery({
     queryKey: ["question-articles"],
     queryFn: () => getArticles({ limit: 4, categorySlug: "hoi-dap" }),
+    placeholderData: (previousData) => previousData,
     staleTime: 10 * 60 * 1000
   });
 

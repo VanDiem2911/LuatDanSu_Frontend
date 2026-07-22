@@ -78,7 +78,7 @@ export function PublicLayout() {
               className="flex flex-shrink-0 items-center"
               aria-label={site.logoText}
             >
-              <img src="/logo.png" alt={site.logoText} className="h-12 w-auto object-contain" />
+              <img src="/logo.png" alt={site.logoText} width={168} height={48} decoding="async" className="h-12 w-auto object-contain" />
             </a>
             <div className="flex flex-row items-center gap-5">
               <nav className="hidden lg:block">
@@ -113,7 +113,7 @@ export function PublicLayout() {
                     placeholder="Tìm kiếm..."
                     className="w-full border-none bg-transparent text-[0.85rem] text-slate-700 outline-none placeholder:text-slate-500 lg:text-[0.9rem]"
                   />
-                  <button className="flex-shrink-0 rounded-full bg-primary p-1.5 text-white transition-colors hover:bg-primary-hover lg:p-2">
+                  <button type="submit" aria-label="Tim kiem" className="flex-shrink-0 rounded-full bg-primary p-1.5 text-white transition-colors hover:bg-primary-hover lg:p-2">
                     <Search className="h-4.5 w-4.5" />
                   </button>
                 </div>
@@ -121,14 +121,14 @@ export function PublicLayout() {
               <button
                 onClick={() => setMenuOpen(true)}
                 className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 text-slate-700 hover:bg-slate-200 sm:hidden transition-colors"
-                aria-label="Tìm kiếm"
+                aria-label="Mo tim kiem"
               >
                 <Search className="h-5 w-5" />
               </button>
               <button
                 onClick={() => setMenuOpen(true)}
                 className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 text-slate-700 hover:bg-slate-200 lg:hidden transition-colors"
-                aria-label="Menu"
+                aria-label="Mo menu di dong"
               >
                 <Menu className="h-6 w-6" />
               </button>
@@ -147,7 +147,9 @@ export function PublicLayout() {
           <div className="flex items-center justify-between">
             <span className="text-sm font-bold uppercase tracking-wider text-slate-400">Danh mục</span>
             <button
+              type="button"
               onClick={() => setMenuOpen(false)}
+              aria-label="Dong menu di dong"
               className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 transition-colors"
             >
               <X className="h-5 w-5" />
@@ -164,7 +166,7 @@ export function PublicLayout() {
                 placeholder="Tìm kiếm..."
                 className="w-full border-none bg-transparent text-sm text-slate-700 outline-none placeholder:text-slate-500"
               />
-              <button className="flex-shrink-0 rounded-full bg-primary p-1.5 text-white transition-colors hover:bg-primary-hover">
+              <button type="submit" aria-label="Tim kiem" className="flex-shrink-0 rounded-full bg-primary p-1.5 text-white transition-colors hover:bg-primary-hover">
                 <Search className="h-4 w-4" />
               </button>
             </div>

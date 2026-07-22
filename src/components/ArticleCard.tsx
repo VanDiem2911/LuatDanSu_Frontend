@@ -24,6 +24,7 @@ export function ArticleCard({ article, category, compact = false }: Props) {
               height={64}
               decoding="async"
               loading="lazy"
+              sizes="80px"
               className={`h-full w-full ${
                 article.image.toLowerCase().includes("logo") ? "object-contain bg-white p-1.5" : "object-cover"
               }`}
@@ -52,6 +53,7 @@ export function ArticleCard({ article, category, compact = false }: Props) {
               height={225}
               decoding="async"
               loading="lazy"
+              sizes="(min-width: 1024px) 400px, (min-width: 768px) 50vw, calc(100vw - 32px)"
               className={`h-full w-full transition-transform duration-300 group-hover:scale-105 ${
                 article.image.toLowerCase().includes("logo") ? "object-contain bg-white p-3" : "object-cover"
               }`}

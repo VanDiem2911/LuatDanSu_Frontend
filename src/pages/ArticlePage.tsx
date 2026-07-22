@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { Calendar, Tag, User, FileText } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { useOutletContext, useParams } from "react-router-dom";
@@ -10,7 +11,7 @@ import { Seo } from "../components/Seo";
 import { Sidebar } from "../components/Sidebar";
 import { getArticle } from "../services/cms";
 import type { NavigationPayload } from "../types/api";
-import { formatDate, optimizedImageUrl } from "../utils/format";
+import { formatDate, optimizedImageUrl, optimizeHtmlImages } from "../utils/format";
 
 const SITE_URL = "https://luatdansu.vercel.app";
 
@@ -22,6 +23,7 @@ export function ArticlePage() {
     queryFn: () => getArticle(articleSlug, categorySlug),
     staleTime: 5 * 60 * 1000
   });
+  const articleContent = useMemo(() => optimizeHtmlImages(article.data?.content, 900), [article.data?.content]);
 
   if (article.isLoading) return <Loading variant="article" />;
   if (article.isError || !article.data) return <ErrorState title="Không tìm thấy bài viết" />;
@@ -105,6 +107,7 @@ export function ArticlePage() {
                   height={450}
                   fetchPriority="high"
                   decoding="async"
+                  sizes="(min-width: 1024px) 760px, calc(100vw - 32px)"
                   className={`h-full w-full ${
                     article.data.image.toLowerCase().includes("logo") ? "object-contain bg-white p-6" : "object-cover"
                   }`}
@@ -113,7 +116,7 @@ export function ArticlePage() {
             ) : null}
             <div
               className="prose-content"
-              dangerouslySetInnerHTML={{ __html: article.data.content }}
+              dangerouslySetInnerHTML={{ __html: articleContent }}
             />
             {article.data.fileUrl ? (
               <div className="my-8 rounded-lg border border-blue-100 bg-blue-50/50 p-5 flex items-center justify-between gap-4">
@@ -141,6 +144,7 @@ export function ArticlePage() {
               <span className="text-sm font-bold uppercase tracking-widest text-slate-900">Chia sẻ:</span>
               <button
                 onClick={() => navigator.clipboard.writeText(window.location.href)}
+                aria-label="Sao chép đường dẫn bài viết"
                 className="ml-4 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-bold text-slate-600 hover:border-primary hover:text-primary"
               >
                 Sao chép đường dẫn

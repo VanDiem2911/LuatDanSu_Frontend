@@ -1,5 +1,5 @@
 import { FormEvent, useEffect, useMemo, useState } from "react";
-import { Link, useOutletContext, useParams, useNavigate, useSearchParams } from "react-router-dom";
+import { Link, useOutletContext, useParams, useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { Breadcrumb } from "../components/Breadcrumb";
 import { BreadcrumbJsonLd, FaqJsonLd } from "../components/JsonLd";
@@ -97,6 +97,7 @@ function TopStory({ article, category }: { article: Article; category: Category 
               height={350}
               fetchPriority="high"
               decoding="async"
+              sizes="(min-width: 1024px) 590px, calc(100vw - 32px)"
               className={`h-full w-full transition group-hover:scale-[1.02] ${
                 article.image.toLowerCase().includes("logo") ? "object-contain bg-white p-3" : "object-cover"
               }`}
@@ -120,15 +121,16 @@ function SmallFeatureGrid({ articles, category }: { articles: Article[]; categor
     <div className="grid gap-4 border-t border-slate-200 pt-5 sm:grid-cols-3">
       {articles.map((article) => (
         <Link key={article._id} to={href(article)} className="group block">
-          <div className="aspect-[16/8] overflow-hidden bg-slate-100 flex items-center justify-center">
+          <div className="aspect-[16/9] overflow-hidden bg-slate-100 flex items-center justify-center">
             {article.image ? (
               <img
                 src={optimizedImageUrl(article.image, 400)}
                 alt={article.title}
                 width={400}
-                height={200}
+                height={225}
                 loading="lazy"
                 decoding="async"
+                sizes="(min-width: 640px) 190px, calc(100vw - 32px)"
                 className={`h-full w-full transition group-hover:scale-105 ${
                   article.image.toLowerCase().includes("logo") ? "object-contain bg-white p-2" : "object-cover"
                 }`}
@@ -170,6 +172,7 @@ function ArticleRow({ article, category, question = false }: { article: Article;
             height={200}
             loading="lazy"
             decoding="async"
+            sizes="(min-width: 640px) 230px, calc(100vw - 32px)"
             className={`h-full w-full transition group-hover:scale-105 ${
               article.image.toLowerCase().includes("logo") ? "object-contain bg-white p-2.5" : "object-cover"
             }`}
@@ -211,16 +214,19 @@ function SidebarColumn({
   return (
     <div className="space-y-8">
       <form onSubmit={handleSearch} className="flex items-center rounded-full border border-slate-200 bg-white px-4">
-        <Search className="h-4 w-4 text-slate-400" />
         <input
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           className="w-full bg-transparent px-3 py-3 text-sm outline-none"
           placeholder="Tìm kiếm bài viết..."
         />
+        <button type="submit" aria-label="Tim kiem bai viet" className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full text-slate-400 hover:bg-slate-100 hover:text-primary">
+          <Search className="h-4 w-4" />
+        </button>
         {search ? (
           <button
             type="button"
+            aria-label="Xoa bo loc tim kiem"
             onClick={() => {
               setQuery("");
               onSearch("");
@@ -241,20 +247,35 @@ function Pagination({ page, totalPages, onChange }: { page: number; totalPages: 
   const pages = Array.from({ length: Math.min(totalPages, 5) }, (_, index) => index + 1);
   return (
     <div className="mt-10 flex items-center justify-center gap-3">
-      <button disabled={page <= 1} onClick={() => onChange(page - 1)} className="h-8 w-8 rounded-full border border-slate-200 bg-white text-slate-400 disabled:opacity-50">
+      <button
+        type="button"
+        disabled={page <= 1}
+        onClick={() => onChange(page - 1)}
+        aria-label="Trang truoc"
+        className="h-8 w-8 rounded-full border border-slate-200 bg-white text-slate-400 disabled:opacity-50"
+      >
         ‹
       </button>
       {pages.map((item) => (
         <button
+          type="button"
           key={item}
           onClick={() => onChange(item)}
+          aria-label={`Trang ${item}`}
+          aria-current={item === page ? "page" : undefined}
           className={`h-9 w-9 rounded-full text-sm font-black ${item === page ? "bg-primary text-white" : "bg-white text-slate-600"}`}
         >
           {item}
         </button>
       ))}
       {totalPages > 5 ? <span className="text-slate-400">...</span> : null}
-      <button disabled={page >= totalPages} onClick={() => onChange(page + 1)} className="h-8 w-8 rounded-full border border-slate-200 bg-white text-slate-400 disabled:opacity-50">
+      <button
+        type="button"
+        disabled={page >= totalPages}
+        onClick={() => onChange(page + 1)}
+        aria-label="Trang sau"
+        className="h-8 w-8 rounded-full border border-slate-200 bg-white text-slate-400 disabled:opacity-50"
+      >
         ›
       </button>
     </div>
@@ -339,7 +360,7 @@ export function CategoryPage() {
 
       <main className="container-page py-14">
         {!hideTopSection ? (
-          <section className="mb-14 grid grid-cols-1 gap-8 lg:grid-cols-[1.55fr_0.7fr_0.8fr]">
+          <section className="mb-14 grid min-h-[650px] grid-cols-1 gap-8 lg:grid-cols-[1.55fr_0.7fr_0.8fr]">
             <div>
               {lead ? (
                 <TopStory article={lead} category={category.data} />
@@ -350,9 +371,9 @@ export function CategoryPage() {
                 <SmallFeatureGrid articles={thumbnails} category={category.data} />
               ) : (
                 <div className="grid gap-4 border-t border-slate-200 pt-5 sm:grid-cols-3">
-                  <div className="aspect-[16/8] skeleton-block rounded" />
-                  <div className="aspect-[16/8] skeleton-block rounded" />
-                  <div className="aspect-[16/8] skeleton-block rounded" />
+                  <div className="aspect-[16/9] skeleton-block rounded" />
+                  <div className="aspect-[16/9] skeleton-block rounded" />
+                  <div className="aspect-[16/9] skeleton-block rounded" />
                 </div>
               )}
             </div>

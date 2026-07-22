@@ -14,7 +14,9 @@ export function SearchPage() {
   const articles = useQuery({
     queryKey: ["search", q],
     queryFn: () => getArticles({ search: q, limit: 20 }),
-    enabled: q.length > 0
+    enabled: q.length > 0,
+    placeholderData: (previousData) => previousData,
+    staleTime: 5 * 60 * 1000
   });
 
   return (

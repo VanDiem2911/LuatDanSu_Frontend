@@ -47,7 +47,7 @@ export function ConsultBanner() {
               required
               className="w-full rounded-full border border-slate-300 bg-white px-6 py-2.5 text-black outline-none transition focus:border-primary sm:w-auto sm:min-w-[200px]"
             />
-            <button className="rounded-full bg-primary px-8 py-3 text-[0.95rem] font-bold text-white transition hover:bg-primary-hover">
+            <button type="submit" aria-label="Nhan tu van phap luat" className="rounded-full bg-primary px-8 py-3 text-[0.95rem] font-bold text-white transition hover:bg-primary-hover">
               Nhận tư vấn
             </button>
           </form>

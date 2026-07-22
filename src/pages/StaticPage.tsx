@@ -1,13 +1,16 @@
 import { useQuery } from "@tanstack/react-query";
+import { useMemo } from "react";
 import { Breadcrumb } from "../components/Breadcrumb";
 import { BreadcrumbJsonLd } from "../components/JsonLd";
 import { ErrorState } from "../components/ErrorState";
 import { Loading } from "../components/Loading";
 import { Seo } from "../components/Seo";
 import { getPage } from "../services/cms";
+import { optimizeHtmlImages } from "../utils/format";
 
 export function StaticPage({ slug }: { slug: string }) {
-  const page = useQuery({ queryKey: ["page", slug], queryFn: () => getPage(slug) });
+  const page = useQuery({ queryKey: ["page", slug], queryFn: () => getPage(slug), staleTime: 5 * 60 * 1000 });
+  const pageContent = useMemo(() => optimizeHtmlImages(page.data?.content, 900), [page.data?.content]);
 
   if (page.isLoading) return <Loading variant="article" />;
   if (page.isError || !page.data) return <ErrorState title="Không tìm thấy trang" />;
@@ -20,7 +23,7 @@ export function StaticPage({ slug }: { slug: string }) {
         <Breadcrumb items={[{ label: page.data.title }]} />
         <article className="max-w-3xl bg-white p-8">
           <h1 className="mb-6 text-4xl font-bold text-ink">{page.data.title}</h1>
-          <div className="prose-content" dangerouslySetInnerHTML={{ __html: page.data.content }} />
+          <div className="prose-content" dangerouslySetInnerHTML={{ __html: pageContent }} />
         </article>
       </main>
     </>

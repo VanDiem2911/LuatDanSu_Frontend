@@ -61,7 +61,7 @@ function CardGrid() {
 
 function HeroFrame() {
   return (
-    <div className="grid gap-8 lg:grid-cols-[1.65fr_0.72fr_0.82fr]">
+    <div className="grid min-h-[650px] gap-8 lg:grid-cols-[1.65fr_0.72fr_0.82fr]">
       <div>
         <Block className="aspect-[16/7] w-full rounded-sm" />
         <div className="space-y-3 py-5">
@@ -72,7 +72,7 @@ function HeroFrame() {
         <div className="grid gap-4 border-t border-slate-200 pt-5 sm:grid-cols-3">
           {Array.from({ length: 3 }, (_, index) => (
             <div key={index}>
-              <Block className="aspect-[16/8] w-full rounded-sm" />
+              <Block className="aspect-[16/9] w-full rounded-sm" />
               <Block className="mt-3 h-3 w-16 rounded" />
               <Block className="mt-2 h-4 w-full rounded" />
             </div>

@@ -143,6 +143,8 @@ export function ContactPage() {
                   />
                 </div>
                 <button
+                  type="submit"
+                  aria-label="Gui yeu cau goi lai"
                   disabled={isSubmittingPhone}
                   className="rounded-full bg-primary px-8 py-3 text-sm font-bold text-white transition hover:bg-primary-hover disabled:opacity-60"
                 >
@@ -202,6 +204,8 @@ export function ContactPage() {
                 </label>
                 <div className="flex justify-end">
                   <button
+                    type="submit"
+                    aria-label="Gui cau hoi phap ly"
                     disabled={isSubmittingQuestion}
                     className="w-full sm:w-auto rounded-full bg-navy px-8 py-3 text-sm font-bold text-white transition hover:bg-slate-800 disabled:opacity-60"
                   >
