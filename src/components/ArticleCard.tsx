@@ -19,11 +19,14 @@ export function ArticleCard({ article, category, compact = false }: Props) {
           {article.image ? (
             <img
               src={article.image}
-              alt=""
+              alt={article.title}
+              width={80}
+              height={64}
+              decoding="async"
+              loading="lazy"
               className={`h-full w-full ${
                 article.image.toLowerCase().includes("logo") ? "object-contain bg-white p-1.5" : "object-cover"
               }`}
-              loading="lazy"
             />
           ) : null}
         </div>
@@ -45,10 +48,13 @@ export function ArticleCard({ article, category, compact = false }: Props) {
             <img
               src={article.image}
               alt={article.title}
+              width={400}
+              height={225}
+              decoding="async"
+              loading="lazy"
               className={`h-full w-full transition-transform duration-300 group-hover:scale-105 ${
                 article.image.toLowerCase().includes("logo") ? "object-contain bg-white p-3" : "object-cover"
               }`}
-              loading="lazy"
             />
           ) : null}
         </div>

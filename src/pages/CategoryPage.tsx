@@ -67,7 +67,7 @@ function ConsultationCard({ image: _image }: { image?: string }) {
         </p>
       </div>
       <div className="aspect-[16/10] w-full overflow-hidden bg-[#fcece2] rounded">
-        <img src="/lawyer.png" alt="Tư vấn luật" className="h-full w-full object-cover" loading="lazy" />
+        <img src="/lawyer.png" alt="Tư vấn luật" width={280} height={175} loading="lazy" decoding="async" className="h-full w-full object-cover" />
       </div>
       <div className="flex flex-col gap-2.5">
         <Link to="/dang-ky-tu-van" className="rounded-full bg-primary py-2.5 text-xs font-black uppercase text-white shadow-md">
@@ -92,6 +92,10 @@ function TopStory({ article, category }: { article: Article; category: Category 
             <img
               src={article.image}
               alt={article.title}
+              width={800}
+              height={350}
+              fetchPriority="high"
+              decoding="async"
               className={`h-full w-full transition group-hover:scale-[1.02] ${
                 article.image.toLowerCase().includes("logo") ? "object-contain bg-white p-3" : "object-cover"
               }`}
@@ -120,6 +124,10 @@ function SmallFeatureGrid({ articles, category }: { articles: Article[]; categor
               <img
                 src={article.image}
                 alt={article.title}
+                width={400}
+                height={200}
+                loading="lazy"
+                decoding="async"
                 className={`h-full w-full transition group-hover:scale-105 ${
                   article.image.toLowerCase().includes("logo") ? "object-contain bg-white p-2" : "object-cover"
                 }`}
@@ -157,6 +165,10 @@ function ArticleRow({ article, category, question = false }: { article: Article;
           <img
             src={article.image}
             alt={article.title}
+            width={320}
+            height={200}
+            loading="lazy"
+            decoding="async"
             className={`h-full w-full transition group-hover:scale-105 ${
               article.image.toLowerCase().includes("logo") ? "object-contain bg-white p-2.5" : "object-cover"
             }`}

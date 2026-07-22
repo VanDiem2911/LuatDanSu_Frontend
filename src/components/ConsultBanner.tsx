@@ -23,8 +23,11 @@ export function ConsultBanner() {
       <div className="relative h-56 overflow-hidden sm:h-64">
         <img
           src="/consult-banner.jpg"
-          alt=""
-          aria-hidden="true"
+          alt="Tư vấn pháp luật dân sự"
+          width={1280}
+          height={256}
+          loading="lazy"
+          decoding="async"
           className="absolute inset-0 z-0 h-full w-full scale-x-[-1] object-cover object-[center_42%]"
         />
         <div className="absolute inset-0 z-10 bg-white/10" />

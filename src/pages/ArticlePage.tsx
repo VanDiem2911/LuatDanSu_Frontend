@@ -100,6 +100,10 @@ export function ArticlePage() {
                 <img
                   src={article.data.image}
                   alt={article.data.title}
+                  width={800}
+                  height={450}
+                  fetchPriority="high"
+                  decoding="async"
                   className={`h-full w-full ${
                     article.data.image.toLowerCase().includes("logo") ? "object-contain bg-white p-6" : "object-cover"
                   }`}
