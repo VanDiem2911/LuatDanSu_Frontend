@@ -1,7 +1,7 @@
 import { Calendar, ChevronRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import type { Article, Category } from "../types/api";
-import { formatDate } from "../utils/format";
+import { formatDate, optimizedImageUrl } from "../utils/format";
 
 type Props = {
   article: Article;
@@ -18,7 +18,7 @@ export function ArticleCard({ article, category, compact = false }: Props) {
         <div className="h-16 w-20 flex-shrink-0 overflow-hidden bg-slate-100 flex items-center justify-center">
           {article.image ? (
             <img
-              src={article.image}
+              src={optimizedImageUrl(article.image, 160)}
               alt={article.title}
               width={80}
               height={64}
@@ -46,7 +46,7 @@ export function ArticleCard({ article, category, compact = false }: Props) {
         <div className="aspect-[16/9] overflow-hidden bg-slate-100 flex items-center justify-center">
           {article.image ? (
             <img
-              src={article.image}
+              src={optimizedImageUrl(article.image, 400)}
               alt={article.title}
               width={400}
               height={225}

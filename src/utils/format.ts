@@ -11,3 +11,10 @@ export function settingValue<T>(settings: Array<{ key: string; value: unknown }>
   const setting = settings?.find((item) => item.key === key);
   return (setting?.value as T | undefined) ?? fallback;
 }
+
+export function optimizedImageUrl(url?: string, width = 600) {
+  if (!url) return "";
+  if (url.startsWith("/")) return url;
+  if (url.includes("wsrv.nl")) return url;
+  return `https://wsrv.nl/?url=${encodeURIComponent(url)}&w=${width}&output=webp&q=80`;
+}

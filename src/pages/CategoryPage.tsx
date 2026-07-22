@@ -11,6 +11,7 @@ import { Sidebar } from "../components/Sidebar";
 import { getArticles, getCategory } from "../services/cms";
 import { ChevronRight, Play, Scale, Search, Zap } from "lucide-react";
 import type { Article, Category, NavigationPayload } from "../types/api";
+import { optimizedImageUrl } from "../utils/format";
 
 const headingCopy: Record<string, { title: string; description: string }> = {
   "tin-tuc": {
@@ -90,7 +91,7 @@ function TopStory({ article, category }: { article: Article; category: Category 
         <div className="aspect-[16/7] overflow-hidden bg-slate-100 flex items-center justify-center">
           {article.image ? (
             <img
-              src={article.image}
+              src={optimizedImageUrl(article.image, 800)}
               alt={article.title}
               width={800}
               height={350}
@@ -122,7 +123,7 @@ function SmallFeatureGrid({ articles, category }: { articles: Article[]; categor
           <div className="aspect-[16/8] overflow-hidden bg-slate-100 flex items-center justify-center">
             {article.image ? (
               <img
-                src={article.image}
+                src={optimizedImageUrl(article.image, 400)}
                 alt={article.title}
                 width={400}
                 height={200}
@@ -163,7 +164,7 @@ function ArticleRow({ article, category, question = false }: { article: Article;
       <div className="aspect-[16/10] overflow-hidden bg-slate-100 flex items-center justify-center">
         {article.image ? (
           <img
-            src={article.image}
+            src={optimizedImageUrl(article.image, 320)}
             alt={article.title}
             width={320}
             height={200}

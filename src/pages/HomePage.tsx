@@ -12,7 +12,7 @@ import { Sidebar } from "../components/Sidebar";
 import { ConsultBanner } from "../components/ConsultBanner";
 import { getArticles, getVideos, submitLead } from "../services/cms";
 import type { Article, Category, NavigationPayload, Video } from "../types/api";
-import { formatDate } from "../utils/format";
+import { formatDate, optimizedImageUrl } from "../utils/format";
 import { isValidPhone, PATTERNS, VALIDATION_MESSAGES } from "../utils/validation";
 
 function articleHref(article: Article) {
@@ -39,13 +39,13 @@ function SectionHeading({ title, href, linkLabel }: { title: string; href?: stri
 
 function ShortArticleList({ articles, categories }: { articles: Article[]; categories: Category[] }) {
   return (
-    <div className="divide-y divide-slate-200 sm:border-x sm:border-slate-200 sm:px-6 lg:px-7">
+    <div className="flex flex-col space-y-4">
       {articles.map((article) => (
-        <Link key={article._id} to={articleHref(article)} className="group block py-3.5 first:pt-0">
-          <span className="text-xs font-bold uppercase tracking-wide text-primary">
+        <Link key={article._id} to={articleHref(article)} className="group block">
+          <span className="text-[0.7rem] font-bold uppercase tracking-wide text-primary">
             {categoryLabel(categories, article.categorySlug)}
           </span>
-          <h3 className="mt-1 line-clamp-2 text-[1.02rem] font-extrabold leading-6 text-slate-800 group-hover:text-primary">
+          <h3 className="mt-1 line-clamp-2 text-base font-extrabold leading-6 text-slate-800 group-hover:text-primary">
             {article.title}
           </h3>
         </Link>
@@ -96,7 +96,7 @@ function HomeLeadArticle({ article, categories }: { article: Article; categories
         <div className="aspect-[16/7] overflow-hidden border border-slate-200 bg-slate-100 flex items-center justify-center">
           {article.image ? (
             <img
-              src={article.image}
+              src={optimizedImageUrl(article.image, 800)}
               alt={article.title}
               fetchPriority="high"
               decoding="async"
@@ -128,7 +128,7 @@ function ThumbnailStrip({ articles, categories }: { articles: Article[]; categor
           <div className="aspect-[16/8] overflow-hidden bg-slate-100 flex items-center justify-center">
             {article.image ? (
               <img
-                src={article.image}
+                src={optimizedImageUrl(article.image, 400)}
                 alt={article.title}
                 loading="lazy"
                 decoding="async"
@@ -177,7 +177,7 @@ function NewsRow({ article, categories }: { article: Article; categories: Catego
       <div className="aspect-[16/10] overflow-hidden bg-slate-100 flex items-center justify-center">
         {article.image ? (
           <img
-            src={article.image}
+            src={optimizedImageUrl(article.image, 320)}
             alt={article.title}
             loading="lazy"
             decoding="async"

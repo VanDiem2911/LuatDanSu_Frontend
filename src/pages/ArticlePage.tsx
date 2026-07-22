@@ -10,7 +10,7 @@ import { Seo } from "../components/Seo";
 import { Sidebar } from "../components/Sidebar";
 import { getArticle } from "../services/cms";
 import type { NavigationPayload } from "../types/api";
-import { formatDate } from "../utils/format";
+import { formatDate, optimizedImageUrl } from "../utils/format";
 
 const SITE_URL = "https://luatdansu.vercel.app";
 
@@ -99,7 +99,7 @@ export function ArticlePage() {
             {article.data.image ? (
               <div className="mb-8 aspect-video w-full overflow-hidden flex items-center justify-center bg-slate-100">
                 <img
-                  src={article.data.image}
+                  src={optimizedImageUrl(article.data.image, 800)}
                   alt={article.data.title}
                   width={800}
                   height={450}
