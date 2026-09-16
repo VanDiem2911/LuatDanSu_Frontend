@@ -1,7 +1,6 @@
 import { useState } from "react";
 import {
   ArrowLeft,
-  BarChart3,
   FileQuestion,
   FileText,
   LayoutDashboard,
@@ -27,15 +26,16 @@ const resources = [
 
 function AdminLogo() {
   return (
-    <div className="grid h-12 w-[110px] grid-rows-[1fr_auto] bg-navy text-white shadow-sm">
-      <div className="grid grid-cols-[1fr_34px] items-center border-b border-white/25">
-        <span className="pl-2 font-serif text-[1.7rem] font-black leading-none tracking-wide">LAW</span>
-        <span className="flex h-full items-center justify-center border-l border-white/25">
-          <BarChart3 className="h-5 w-5" strokeWidth={1.5} />
-        </span>
-      </div>
-      <span className="pb-0.5 text-center font-serif text-[0.62rem] font-semibold uppercase tracking-[0.24em]">Luatdansu</span>
-    </div>
+    <Link to="/admin" className="flex items-center justify-center" aria-label="Luật Dân Sự">
+      <img
+        src="/logo.webp"
+        alt="Luật Dân Sự"
+        width={104}
+        height={48}
+        decoding="async"
+        className="h-12 w-auto object-contain"
+      />
+    </Link>
   );
 }
 

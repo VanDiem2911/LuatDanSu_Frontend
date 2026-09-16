@@ -36,6 +36,9 @@ export function LoginPage() {
   return (
     <main className="flex min-h-screen items-center justify-center bg-slate-100 px-4">
       <form onSubmit={handleSubmit} className="w-full max-w-md border border-slate-200 bg-white p-8 shadow-soft">
+        <div className="mb-5">
+          <img src="/logo.webp" alt="Luật Dân Sự" width={104} height={48} decoding="async" className="h-12 w-auto object-contain" />
+        </div>
         <p className="text-xs font-bold uppercase tracking-widest text-primary">Luật Dân Sự CMS</p>
         <h1 className="mt-2 text-3xl font-black text-navy">Đăng nhập quản trị</h1>
         <div className="mt-8 space-y-4">
