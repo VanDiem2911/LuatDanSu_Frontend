@@ -66,6 +66,25 @@ async function writeRoute(route, html) {
   await writeFile(new URL(fileName, directory), html);
 }
 
+const staticRoutes = [
+  "tim-kiem",
+  "gioi-thieu",
+  "lien-he",
+  "dang-ky-tu-van",
+  "admin",
+  "admin/login",
+  "admin/dashboard",
+  "404"
+];
+
+for (const route of staticRoutes) {
+  try {
+    await writeRoute(route, baseHtml);
+  } catch (err) {
+    console.warn(`Failed to write static route ${route}:`, err);
+  }
+}
+
 try {
   const categoryResponse = await apiJson("/public/categories?limit=100&sort=order&order=asc");
   const categories = categoryResponse.data ?? [];
@@ -109,12 +128,9 @@ try {
     }
   }
 
-  for (const route of ["tim-kiem", "gioi-thieu", "lien-he", "dang-ky-tu-van"]) {
-    writes.push(writeRoute(route, baseHtml));
-  }
-
   await Promise.all(writes);
-  console.log(`Generated ${writes.length} route HTML files with early LCP discovery.`);
+  console.log(`Generated ${writes.length} dynamic route HTML files with early LCP discovery.`);
 } catch (error) {
-  console.warn(`Route HTML generation skipped: ${error instanceof Error ? error.message : String(error)}`);
+  console.warn(`Dynamic route HTML generation skipped: ${error instanceof Error ? error.message : String(error)}`);
 }
+
