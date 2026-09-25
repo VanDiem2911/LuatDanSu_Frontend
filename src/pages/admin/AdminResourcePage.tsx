@@ -1,6 +1,6 @@
 import { FormEvent, useMemo, useState, useEffect } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Edit, Plus, Search, Trash2, X, Copy, MessageSquarePlus, FileText } from "lucide-react";
+import { Edit, Plus, Search, Trash2, X, Copy, MessageSquarePlus, FileText, Eye } from "lucide-react";
 import { useParams, useSearchParams, useNavigate, useLocation } from "react-router-dom";
 import { toast } from "sonner";
 import { createAdminResource, deleteAdminResource, listAdminResource, updateAdminResource, uploadMedia } from "../../services/cms";
@@ -192,6 +192,30 @@ const officeSettingFields: FieldConfig[] = Array.from({ length: 4 }, (_, index) 
   { name: `office${index}Address`, label: `Địa chỉ văn phòng ${index + 1}`, type: "textarea" as FieldType, rows: 2, full: true }
 ]).flat();
 
+const categoryNameMap: Record<string, string> = {
+  "thua-ke": "Thừa Kế",
+  "tin-tuc": "Tin Tức",
+  "dat-dai": "Đất Đai",
+  "ly-hon": "Hôn Nhân",
+  "hoi-dap": "Hỏi Đáp",
+  "bieu-mau": "Biểu Mẫu"
+};
+
+function formatDateVN(dateVal?: unknown, withTime = false) {
+  if (!dateVal) return "--/--/----";
+  const date = new Date(String(dateVal));
+  if (isNaN(date.getTime())) return String(dateVal);
+  const dd = String(date.getDate()).padStart(2, "0");
+  const mm = String(date.getMonth() + 1).padStart(2, "0");
+  const yyyy = date.getFullYear();
+  if (withTime) {
+    const hh = String(date.getHours()).padStart(2, "0");
+    const min = String(date.getMinutes()).padStart(2, "0");
+    return `${dd}/${mm}/${yyyy} ${hh}:${min}`;
+  }
+  return `${dd}/${mm}/${yyyy}`;
+}
+
 function statusOptions() {
   return [
     { label: "Nháp", value: "draft" },
@@ -201,11 +225,17 @@ function statusOptions() {
 }
 
 export function AdminResourcePage() {
-  const { resource = "articles" } = useParams();
+  const { resource: rawResource = "articles" } = useParams();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const location = useLocation();
   const queryClient = useQueryClient();
+
+  let resource = rawResource;
+  if (rawResource === "posts") resource = "articles";
+  if (rawResource === "forms") resource = "articles";
+  if (rawResource === "phones") resource = "leads";
+
   const [search, setSearch] = useState("");
   const [editing, setEditing] = useState<Record<string, unknown> | null>(null);
   const [formValues, setFormValues] = useState<Record<string, unknown>>({});
@@ -216,8 +246,9 @@ export function AdminResourcePage() {
   const [sortOrder, setSortOrder] = useState<"asc" | "desc" | "">("");
   const [limit, setLimit] = useState(10);
 
-  const categorySlug = searchParams.get("categorySlug") ?? undefined;
-  const label = categorySlug === "bieu-mau" ? "Biểu mẫu" : resourceLabels[resource] ?? resource;
+  const categorySlug = (rawResource === "forms" ? "bieu-mau" : searchParams.get("categorySlug")) ?? undefined;
+  const isBieuMau = categorySlug === "bieu-mau";
+  const label = isBieuMau ? "Biểu mẫu" : resourceLabels[resource] ?? resource;
   const fields = useMemo(() => {
     const rawFields = fieldConfigs[resource] ?? fieldsFromSample(samples[resource] ?? {});
     if (resource === "articles") {
@@ -411,198 +442,517 @@ export function AdminResourcePage() {
     saveMutation.mutate();
   }
 
+  async function handleToggleLeadStatus(row: Record<string, unknown>) {
+    const currentStatus = String(row.status ?? "new");
+    const newStatus = currentStatus === "contacted" ? "new" : "contacted";
+    try {
+      await updateAdminResource("leads", String(row._id), { status: newStatus });
+      toast.success(newStatus === "contacted" ? "Đã chuyển sang Đã gọi" : "Đã chuyển sang Chưa gọi");
+      queryClient.invalidateQueries({ queryKey: ["admin-resource", resource] });
+    } catch {
+      toast.error("Không thể cập nhật trạng thái");
+    }
+  }
+
+  let pageTitle = "QUẢN LÝ DỮ LIỆU";
+  let addButtonText = "Thêm mới";
+  let searchPlaceholder = "Tìm kiếm...";
+  let hasAddButton = true;
+
+  if (isBieuMau) {
+    pageTitle = "QUẢN LÝ BIỂU MẪU";
+    addButtonText = "Thêm biểu mẫu";
+    searchPlaceholder = "Tìm kiếm biểu mẫu...";
+  } else if (resource === "articles") {
+    pageTitle = "QUẢN LÝ BÀI VIẾT";
+    addButtonText = "Thêm bài mới";
+    searchPlaceholder = "Tìm kiếm bài viết...";
+  } else if (resource === "videos") {
+    pageTitle = "QUẢN LÝ VIDEO";
+    addButtonText = "Thêm Video";
+    searchPlaceholder = "Tìm kiếm video...";
+  } else if (resource === "leads") {
+    pageTitle = "THỐNG KÊ SĐT";
+    hasAddButton = false;
+    searchPlaceholder = "Tìm kiếm số điện thoại hoặc tên...";
+  } else if (resource === "comments") {
+    pageTitle = "QUẢN LÝ CÂU HỎI";
+    hasAddButton = false;
+    searchPlaceholder = "Tìm kiếm câu hỏi...";
+  } else if (resource === "categories") {
+    pageTitle = "QUẢN LÝ CHUYÊN MỤC";
+    addButtonText = "Thêm chuyên mục";
+    searchPlaceholder = "Tìm kiếm chuyên mục...";
+  }
+
   return (
-    <div>
+    <div className="space-y-6">
+      {/* Top Header Row */}
       <div className="flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <h1 className="section-title text-[1.7rem]">{label}</h1>
-          <p className="mt-3 text-sm font-medium text-slate-500">
-            {resource === "settings"
-              ? "Thiết lập phương thức liên lạc và địa chỉ của văn phòng."
-              : "Quản lý dữ liệu qua form nhập liệu, có phân trang và tìm kiếm."}
-          </p>
+        <div className="flex items-center gap-3">
+          <span className="h-6 w-1 rounded-full bg-[#2563eb]" />
+          <h1 className="text-xl font-bold uppercase tracking-wider text-slate-800">
+            {pageTitle}
+          </h1>
         </div>
-        {resource !== "leads" && resource !== "comments" && resource !== "settings" ? (
-          <button onClick={openCreate} className="inline-flex items-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-black text-white">
-            <Plus className="h-4 w-4" />
-            Tạo mới
-          </button>
-        ) : null}
-      </div>
 
-      <div className="mt-6 flex flex-wrap gap-4 items-center">
-        <form
-          onSubmit={(event) => {
-            event.preventDefault();
-            setPage(1);
-            query.refetch();
-          }}
-          className="flex flex-1 min-w-[280px] items-center rounded-full border border-slate-200 bg-white px-4 shadow-sm"
-        >
-          <Search className="h-4 w-4 text-slate-400" />
-          <input
-            value={search}
-            onChange={(event) => setSearch(event.target.value)}
-            placeholder="Tìm kiếm..."
-            className="w-full bg-transparent px-3 py-2.5 outline-none text-sm"
-          />
-        </form>
-
-        {resource === "articles" && categorySlug !== "bieu-mau" ? (
-          <select
-            value={filterCategory}
-            onChange={(e) => {
-              setFilterCategory(e.target.value);
-              setPage(1);
-            }}
-            className="rounded-full border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm outline-none focus:border-primary"
+        {hasAddButton && (
+          <button
+            onClick={openCreate}
+            className="inline-flex items-center gap-2 rounded-full bg-[#2563eb] px-6 py-2.5 text-sm font-bold text-white shadow-sm transition hover:bg-blue-700 active:scale-95"
           >
-            <option value="">Tất cả chuyên mục</option>
-            {categoryOptions
-              .filter((opt) => opt.value !== "bieu-mau")
-              .map((opt) => (
-                <option key={opt.value} value={opt.value}>
-                  {opt.label}
-                </option>
-              ))}
-          </select>
-        ) : null}
-
-        <div className="flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 shadow-sm">
-          <span className="text-xs font-bold text-slate-400 uppercase">Ngày:</span>
-          <input
-            type="date"
-            value={filterDate}
-            onChange={(e) => {
-              setFilterDate(e.target.value);
-              setPage(1);
-            }}
-            className="border-0 bg-transparent text-sm font-semibold text-slate-700 outline-none cursor-pointer"
-          />
-          {filterDate && (
-            <button
-              type="button"
-              onClick={() => {
-                setFilterDate("");
-                setPage(1);
-              }}
-              className="text-red-500 hover:text-red-700 text-sm font-bold pl-1"
-              title="Xóa lọc ngày"
-            >
-              X
-            </button>
-          )}
-        </div>
-      </div>
-
-      <div className="mt-6 overflow-x-auto border border-slate-200 bg-white shadow-sm">
-        {query.isLoading ? (
-          <Loading variant="table" />
-        ) : query.isError ? (
-          <ErrorState />
-        ) : (
-          <table className="min-w-full divide-y divide-slate-200 text-left text-sm">
-            <thead className="bg-slate-50 text-xs font-bold uppercase tracking-wider text-slate-500">
-              <tr>
-                {columns.map((column) => {
-                  const isSortable = ["views", "title", "name", "publishedAt", "createdAt"].includes(column);
-                  const isSorted = sortField === column;
-                  return (
-                    <th
-                      key={column}
-                      onClick={() => isSortable && handleSort(column)}
-                      className={`px-4 py-4 ${
-                        isSortable ? "cursor-pointer select-none hover:text-navy hover:bg-slate-100 transition" : ""
-                      }`}
-                    >
-                      <div className="flex items-center gap-1">
-                        <span>{columnTranslations[column] || column}</span>
-                        {isSortable && (
-                          <span className={`text-xs ${isSorted ? "text-primary font-black" : "text-slate-300"}`}>
-                            {isSorted ? (sortOrder === "asc" ? " ↑" : " ↓") : " ↕"}
-                          </span>
-                        )}
-                      </div>
-                    </th>
-                  );
-                })}
-                <th className="px-4 py-4 text-right">Thao tác</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {query.data?.data.map((row) => (
-                <tr key={String(row._id)} className="hover:bg-slate-50">
-                  {columns.map((column) => (
-                    <td key={column} className="max-w-xs truncate px-4 py-4 font-medium text-slate-700">
-                      {renderCell(row, column)}
-                    </td>
-                  ))}
-                  <td className="px-4 py-4 text-right">
-                    {resource === "comments" ? (
-                      <button
-                        onClick={() => {
-                          navigate(`/admin/articles?action=reply&title=${encodeURIComponent(String(row.content ?? ""))}&author=${encodeURIComponent(String(row.name ?? ""))}`);
-                        }}
-                        className="mr-2 inline-flex items-center gap-1 bg-green-50 hover:bg-green-100 text-green-700 border border-green-200 px-3 py-1.5 rounded text-xs font-bold transition shadow-sm"
-                        title="Trả lời câu hỏi (Tạo bài viết hỏi đáp)"
-                      >
-                        <MessageSquarePlus className="h-3.5 w-3.5" />
-                        Trả lời
-                      </button>
-                    ) : resource !== "leads" ? (
-                      <button onClick={() => openEdit(row)} className="mr-2 inline-flex p-2 text-primary">
-                        <Edit className="h-4 w-4" />
-                      </button>
-                    ) : null}
-                    {resource !== "settings" && (
-                      <button onClick={() => handleDelete(String(row._id))} className="inline-flex p-2 text-red-600" title="Xóa">
-                        <Trash2 className="h-4 w-4" />
-                      </button>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+            <Plus className="h-4 w-4" />
+            <span>{addButtonText}</span>
+          </button>
         )}
       </div>
 
-      <div className="mt-4 flex flex-wrap items-center justify-between gap-4 text-sm font-semibold text-slate-500">
-        <div className="flex flex-wrap items-center gap-6">
-          <span>Tổng: {query.data?.meta.total ?? 0}</span>
-          <div className="flex items-center gap-2">
-            <span>Hiển thị:</span>
-            <select
-              value={limit}
-              onChange={(e) => {
-                setLimit(Number(e.target.value));
-                setPage(1);
-              }}
-              className="rounded border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 outline-none focus:border-primary shadow-sm cursor-pointer"
-            >
-              <option value="10">10 bản ghi</option>
-              <option value="50">50 bản ghi</option>
-              <option value="100">100 bản ghi</option>
-              <option value="200">200 bản ghi</option>
-              <option value="9999">Tất cả</option>
-            </select>
-          </div>
+      {/* Main Table Card */}
+      <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm">
+        {/* Search Bar */}
+        <div className="relative mb-6 max-w-md">
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+          <input
+            value={search}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setPage(1);
+            }}
+            placeholder={searchPlaceholder}
+            className="w-full rounded-xl border border-slate-200 bg-white pl-10 pr-4 py-2.5 text-sm text-slate-800 outline-none focus:border-[#2563eb] placeholder:text-slate-400 shadow-sm"
+          />
         </div>
-        <div className="flex gap-2">
-          <button
-            disabled={page <= 1}
-            onClick={() => setPage((value) => Math.max(value - 1, 1))}
-            className="border border-slate-200 bg-white px-4 py-2 font-bold disabled:opacity-50"
-          >
-            Trước
-          </button>
-          <button
-            disabled={page >= (query.data?.meta.totalPages ?? 1)}
-            onClick={() => setPage((value) => value + 1)}
-            className="border border-slate-200 bg-white px-4 py-2 font-bold disabled:opacity-50"
-          >
-            Sau
-          </button>
+
+        {/* Content Table */}
+        <div className="overflow-x-auto">
+          {query.isLoading ? (
+            <Loading variant="table" />
+          ) : query.isError ? (
+            <ErrorState />
+          ) : isBieuMau ? (
+            /* Biểu mẫu Table (Ảnh 3) */
+            <table className="min-w-full text-left text-sm">
+              <thead>
+                <tr className="border-b border-slate-100 text-xs font-bold uppercase tracking-wider text-slate-500">
+                  <th className="pb-4 pr-4">Biểu mẫu</th>
+                  <th className="pb-4 px-4 whitespace-nowrap">Ngày đăng</th>
+                  <th className="pb-4 px-4 whitespace-nowrap">Trạng thái</th>
+                  <th className="pb-4 pl-4 text-right whitespace-nowrap">Thao tác</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {query.data?.data.map((row: any) => {
+                  const dateStr = formatDateVN(row.publishedAt || row.createdAt);
+                  const publicUrl = `/${row.categorySlug || "bieu-mau"}/${row.slug || row._id}`;
+
+                  return (
+                    <tr key={String(row._id)} className="hover:bg-slate-50/80 transition-colors">
+                      <td className="py-4 pr-4">
+                        <div className="flex items-center gap-3.5">
+                          <div className="flex h-10 w-14 items-center justify-center rounded-lg bg-amber-50 border border-amber-200/60 text-amber-700 flex-shrink-0">
+                            <FileText className="h-5 w-5" />
+                          </div>
+                          <span className="font-bold text-slate-800 line-clamp-2 max-w-lg">
+                            {row.title}
+                          </span>
+                        </div>
+                      </td>
+                      <td className="py-4 px-4 text-slate-600 font-medium whitespace-nowrap">
+                        {dateStr}
+                      </td>
+                      <td className="py-4 px-4 whitespace-nowrap">
+                        <span className="inline-block rounded-full bg-[#ecfdf5] px-2.5 py-0.5 text-xs font-semibold text-[#059669]">
+                          Hiển thị
+                        </span>
+                      </td>
+                      <td className="py-4 pl-4 text-right whitespace-nowrap">
+                        <div className="inline-flex items-center justify-end gap-2">
+                          <a
+                            href={publicUrl}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="p-1.5 text-emerald-500 hover:text-emerald-600 transition"
+                            title="Xem biểu mẫu trên web"
+                          >
+                            <Eye className="h-4 w-4" />
+                          </a>
+                          <button
+                            onClick={() => openEdit(row)}
+                            className="p-1.5 text-[#2563eb] hover:text-blue-700 transition"
+                            title="Chỉnh sửa"
+                          >
+                            <Edit className="h-4 w-4" />
+                          </button>
+                          <button
+                            onClick={() => handleDelete(String(row._id))}
+                            className="p-1.5 text-[#ef4444] hover:text-red-700 transition"
+                            title="Xóa"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          ) : resource === "articles" ? (
+            /* Bài viết Table (Ảnh 1) */
+            <table className="min-w-full text-left text-sm">
+              <thead>
+                <tr className="border-b border-slate-100 text-xs font-bold uppercase tracking-wider text-slate-500">
+                  <th className="pb-4 pr-4">Tiêu đề</th>
+                  <th className="pb-4 px-4 whitespace-nowrap">Chuyên mục</th>
+                  <th className="pb-4 px-4 whitespace-nowrap">Lượt xem</th>
+                  <th className="pb-4 px-4 whitespace-nowrap">Ngày đăng</th>
+                  <th className="pb-4 pl-4 text-right whitespace-nowrap">Thao tác</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {query.data?.data.map((row: any) => {
+                  const catName = categoryNameMap[row.categorySlug] || row.categorySlug || "Thừa Kế";
+                  const dateStr = formatDateVN(row.publishedAt || row.createdAt);
+                  const publicUrl = `/${row.categorySlug || "tin-tuc"}/${row.slug || row._id}`;
+
+                  return (
+                    <tr key={String(row._id)} className="hover:bg-slate-50/80 transition-colors">
+                      <td className="py-4 pr-4">
+                        <div className="flex items-center gap-3.5">
+                          <img
+                            src={row.image || "/logo.webp"}
+                            alt=""
+                            className="h-10 w-14 rounded-md object-cover bg-slate-100 flex-shrink-0"
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).src = "/logo.webp";
+                            }}
+                          />
+                          <span className="font-bold text-slate-800 line-clamp-2 max-w-md">
+                            {row.title}
+                          </span>
+                        </div>
+                      </td>
+                      <td className="py-4 px-4 text-slate-600 font-medium whitespace-nowrap">
+                        {catName}
+                      </td>
+                      <td className="py-4 px-4 text-slate-600 font-medium whitespace-nowrap">
+                        {row.views ?? 0}
+                      </td>
+                      <td className="py-4 px-4 text-slate-600 font-medium whitespace-nowrap">
+                        {dateStr}
+                      </td>
+                      <td className="py-4 pl-4 text-right whitespace-nowrap">
+                        <div className="inline-flex items-center justify-end gap-2">
+                          <a
+                            href={publicUrl}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="p-1.5 text-emerald-500 hover:text-emerald-600 transition"
+                            title="Xem bài viết trên web"
+                          >
+                            <Eye className="h-4 w-4" />
+                          </a>
+                          <button
+                            onClick={() => openEdit(row)}
+                            className="p-1.5 text-[#2563eb] hover:text-blue-700 transition"
+                            title="Chỉnh sửa"
+                          >
+                            <Edit className="h-4 w-4" />
+                          </button>
+                          <button
+                            onClick={() => handleDelete(String(row._id))}
+                            className="p-1.5 text-[#ef4444] hover:text-red-700 transition"
+                            title="Xóa"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          ) : resource === "leads" ? (
+            /* Thống kê SĐT Table (Ảnh 4) */
+            <table className="min-w-full text-left text-sm">
+              <thead>
+                <tr className="border-b border-slate-100 text-xs font-bold uppercase tracking-wider text-slate-500">
+                  <th className="pb-4 pr-4 w-16 whitespace-nowrap">STT</th>
+                  <th className="pb-4 px-4 whitespace-nowrap">Số điện thoại</th>
+                  <th className="pb-4 px-4 whitespace-nowrap">Ngày gửi</th>
+                  <th className="pb-4 px-4 whitespace-nowrap">Trạng thái</th>
+                  <th className="pb-4 pl-4 text-right whitespace-nowrap">Đánh dấu xử lý</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {query.data?.data.map((row: any, idx: number) => {
+                  const stt = (page - 1) * limit + idx + 1;
+                  const isContacted = row.status === "contacted";
+                  const dateStr = formatDateVN(row.createdAt, true);
+
+                  return (
+                    <tr key={String(row._id)} className="hover:bg-slate-50/80 transition-colors">
+                      <td className="py-4 pr-4 font-bold text-slate-700">
+                        {stt}
+                      </td>
+                      <td className="py-4 px-4 font-bold text-[#2563eb] tracking-wide">
+                        {row.phone}
+                      </td>
+                      <td className="py-4 px-4 text-slate-600 font-medium whitespace-nowrap">
+                        {dateStr}
+                      </td>
+                      <td className="py-4 px-4 whitespace-nowrap">
+                        <span
+                          className={`inline-block rounded-full px-3 py-1 text-xs font-semibold ${
+                            isContacted
+                              ? "bg-[#f0fdf4] text-[#16a34a]"
+                              : "bg-[#fff7ed] text-[#ea580c]"
+                          }`}
+                        >
+                          {isContacted ? "Đã gọi" : "Chưa gọi"}
+                        </span>
+                      </td>
+                      <td className="py-4 pl-4 text-right whitespace-nowrap">
+                        <button
+                          onClick={() => handleToggleLeadStatus(row)}
+                          className="rounded-lg bg-slate-100 hover:bg-slate-200 px-3.5 py-1.5 text-xs font-bold text-slate-700 transition active:scale-95 shadow-sm"
+                        >
+                          Đổi trạng thái
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          ) : resource === "videos" ? (
+            /* Videos Table (Ảnh 5) */
+            <table className="min-w-full text-left text-sm">
+              <thead>
+                <tr className="border-b border-slate-100 text-xs font-bold uppercase tracking-wider text-slate-500">
+                  <th className="pb-4 pr-4">Video tư vấn</th>
+                  <th className="pb-4 px-4 whitespace-nowrap">Trạng thái</th>
+                  <th className="pb-4 pl-4 text-right whitespace-nowrap">Thao tác</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {query.data?.data.map((row: any) => {
+                  const thumb = `https://img.youtube.com/vi/${row.youtubeId}/hqdefault.jpg`;
+                  const ytUrl = `https://www.youtube.com/watch?v=${row.youtubeId}`;
+                  const isHidden = Boolean(row.isHidden);
+
+                  return (
+                    <tr key={String(row._id)} className="hover:bg-slate-50/80 transition-colors">
+                      <td className="py-4 pr-4">
+                        <div className="flex items-center gap-3.5">
+                          <img
+                            src={thumb}
+                            alt=""
+                            className="h-10 w-16 rounded-md object-cover bg-slate-100 flex-shrink-0"
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).src = "/logo.webp";
+                            }}
+                          />
+                          <div>
+                            <p className="font-bold text-slate-800 line-clamp-2 max-w-lg">
+                              {row.title}
+                            </p>
+                            <p className="text-xs text-slate-400 mt-0.5">
+                              ID: {row.youtubeId}
+                            </p>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="py-4 px-4 whitespace-nowrap">
+                        <span
+                          className={`text-xs font-bold uppercase ${
+                            !isHidden ? "text-emerald-500" : "text-slate-400"
+                          }`}
+                        >
+                          {!isHidden ? "HIỂN THỊ" : "ẨN"}
+                        </span>
+                      </td>
+                      <td className="py-4 pl-4 text-right whitespace-nowrap">
+                        <div className="inline-flex items-center justify-end gap-2">
+                          <a
+                            href={ytUrl}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="p-1.5 text-emerald-500 hover:text-emerald-600 transition"
+                            title="Xem video trên YouTube"
+                          >
+                            <Eye className="h-4 w-4" />
+                          </a>
+                          <button
+                            onClick={() => openEdit(row)}
+                            className="p-1.5 text-[#2563eb] hover:text-blue-700 transition"
+                            title="Chỉnh sửa"
+                          >
+                            <Edit className="h-4 w-4" />
+                          </button>
+                          <button
+                            onClick={() => handleDelete(String(row._id))}
+                            className="p-1.5 text-[#ef4444] hover:text-red-700 transition"
+                            title="Xóa"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          ) : resource === "comments" ? (
+            /* Câu hỏi Table */
+            <table className="min-w-full text-left text-sm">
+              <thead>
+                <tr className="border-b border-slate-100 text-xs font-bold uppercase tracking-wider text-slate-500">
+                  <th className="pb-4 pr-4">Người hỏi & Nội dung</th>
+                  <th className="pb-4 px-4 whitespace-nowrap">Ngày gửi</th>
+                  <th className="pb-4 px-4 whitespace-nowrap">Trạng thái</th>
+                  <th className="pb-4 pl-4 text-right whitespace-nowrap">Thao tác</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {query.data?.data.map((row: any) => {
+                  const isPending = row.status === "pending";
+                  const dateStr = formatDateVN(row.createdAt, true);
+
+                  return (
+                    <tr key={String(row._id)} className="hover:bg-slate-50/80 transition-colors">
+                      <td className="py-4 pr-4">
+                        <p className="font-bold text-slate-800">
+                          {row.name} <span className="font-normal text-xs text-slate-400">({row.email})</span>
+                        </p>
+                        <p className="text-xs text-slate-600 mt-1 line-clamp-2 max-w-lg">
+                          {row.content}
+                        </p>
+                      </td>
+                      <td className="py-4 px-4 text-slate-600 font-medium whitespace-nowrap">
+                        {dateStr}
+                      </td>
+                      <td className="py-4 px-4 whitespace-nowrap">
+                        <span
+                          className={`inline-block rounded-full px-2.5 py-0.5 text-xs font-semibold ${
+                            isPending
+                              ? "bg-amber-50 text-amber-700"
+                              : "bg-emerald-50 text-emerald-700"
+                          }`}
+                        >
+                          {isPending ? "Chờ duyệt" : "Đã duyệt"}
+                        </span>
+                      </td>
+                      <td className="py-4 pl-4 text-right whitespace-nowrap">
+                        <div className="inline-flex items-center justify-end gap-2">
+                          <button
+                            onClick={() => {
+                              navigate(
+                                `/admin/articles?action=reply&title=${encodeURIComponent(
+                                  String(row.content ?? "")
+                                )}&author=${encodeURIComponent(String(row.name ?? ""))}`
+                              );
+                            }}
+                            className="inline-flex items-center gap-1 bg-green-50 hover:bg-green-100 text-green-700 border border-green-200 px-3 py-1.5 rounded-lg text-xs font-bold transition shadow-sm"
+                            title="Tạo bài viết trả lời câu hỏi này"
+                          >
+                            <MessageSquarePlus className="h-3.5 w-3.5" />
+                            <span>Trả lời</span>
+                          </button>
+                          <button
+                            onClick={() => openEdit(row)}
+                            className="p-1.5 text-[#2563eb] hover:text-blue-700 transition"
+                            title="Chỉnh sửa"
+                          >
+                            <Edit className="h-4 w-4" />
+                          </button>
+                          <button
+                            onClick={() => handleDelete(String(row._id))}
+                            className="p-1.5 text-[#ef4444] hover:text-red-700 transition"
+                            title="Xóa"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          ) : (
+            /* Generic Fallback Table */
+            <table className="min-w-full text-left text-sm">
+              <thead>
+                <tr className="border-b border-slate-100 text-xs font-bold uppercase tracking-wider text-slate-500">
+                  {columns.map((column) => (
+                    <th key={column} className="pb-4 px-4">
+                      {columnTranslations[column] || column}
+                    </th>
+                  ))}
+                  <th className="pb-4 pl-4 text-right">Thao tác</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {query.data?.data.map((row) => (
+                  <tr key={String(row._id)} className="hover:bg-slate-50/80 transition-colors">
+                    {columns.map((column) => (
+                      <td key={column} className="max-w-xs truncate py-4 px-4 font-medium text-slate-700">
+                        {renderCell(row, column)}
+                      </td>
+                    ))}
+                    <td className="py-4 pl-4 text-right whitespace-nowrap">
+                      <div className="inline-flex items-center justify-end gap-2">
+                        <button
+                          onClick={() => openEdit(row)}
+                          className="p-1.5 text-[#2563eb] hover:text-blue-700 transition"
+                          title="Chỉnh sửa"
+                        >
+                          <Edit className="h-4 w-4" />
+                        </button>
+                        <button
+                          onClick={() => handleDelete(String(row._id))}
+                          className="p-1.5 text-[#ef4444] hover:text-red-700 transition"
+                          title="Xóa"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </div>
+
+        {/* Pagination Bar */}
+        <div className="mt-6 flex flex-wrap items-center justify-between gap-4 border-t border-slate-100 pt-4 text-xs font-medium text-slate-500">
+          <span>
+            Hiển thị {query.data?.data.length ?? 0} trên tổng số {query.data?.meta.total ?? 0} bản ghi
+          </span>
+
+          <div className="flex items-center gap-2">
+            <button
+              disabled={page <= 1}
+              onClick={() => setPage((v) => Math.max(v - 1, 1))}
+              className="rounded-lg border border-slate-200 bg-white px-3.5 py-1.5 font-bold text-slate-700 hover:bg-slate-50 disabled:opacity-40 shadow-sm transition"
+            >
+              Trước
+            </button>
+            <span className="px-2 font-bold text-slate-700">
+              {page} / {query.data?.meta.totalPages || 1}
+            </span>
+            <button
+              disabled={page >= (query.data?.meta.totalPages ?? 1)}
+              onClick={() => setPage((v) => v + 1)}
+              className="rounded-lg border border-slate-200 bg-white px-3.5 py-1.5 font-bold text-slate-700 hover:bg-slate-50 disabled:opacity-40 shadow-sm transition"
+            >
+              Sau
+            </button>
+          </div>
         </div>
       </div>
 

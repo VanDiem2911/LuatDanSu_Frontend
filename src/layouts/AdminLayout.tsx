@@ -1,10 +1,10 @@
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import {
-  ArrowLeft,
-  FileQuestion,
   FileText,
   LayoutDashboard,
   LogOut,
+  MessageSquare,
   PhoneCall,
   Settings,
   UserRound,
@@ -13,27 +13,39 @@ import {
   X
 } from "lucide-react";
 import { Link, Navigate, Outlet, useLocation, useNavigate } from "react-router-dom";
+import { listAdminResource } from "../services/cms";
 
 const resources = [
   { label: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
-  { label: "Câu hỏi", href: "/admin/comments", icon: FileQuestion },
-  { label: "Bài viết", href: "/admin/articles", icon: FileText },
-  { label: "Biểu mẫu", href: "/admin/articles?categorySlug=bieu-mau", icon: FileText },
+  { label: "Câu hỏi", href: "/admin/comments", icon: MessageSquare },
+  { label: "Bài viết", href: "/admin/posts", icon: FileText },
+  { label: "Biểu mẫu", href: "/admin/forms", icon: FileText },
   { label: "Videos", href: "/admin/videos", icon: Video },
-  { label: "Thống kê SĐT", href: "/admin/leads", icon: PhoneCall },
+  { label: "Thống kê SĐT", href: "/admin/phones", icon: PhoneCall },
   { label: "Cấu hình", href: "/admin/settings", icon: Settings }
 ];
 
 function AdminLogo() {
+  const { data } = useQuery({
+    queryKey: ["admin-site-logo"],
+    queryFn: () => listAdminResource("settings", { limit: 10 }),
+    staleTime: 60_000
+  });
+  const site = data?.data?.find((s: any) => s.key === "site")?.value as any;
+  const logoUrl = site?.logoUrl || "/logo.webp";
+
   return (
-    <Link to="/admin" className="flex items-center justify-center" aria-label="Luật Dân Sự">
+    <Link to="/admin" className="flex items-center justify-center px-4" aria-label="Luật Dân Sự">
       <img
-        src="/logo.webp"
+        src={logoUrl}
         alt="Luật Dân Sự"
         width={104}
         height={48}
         decoding="async"
-        className="h-12 w-auto object-contain"
+        className="h-11 w-auto max-w-[180px] object-contain"
+        onError={(e) => {
+          (e.target as HTMLImageElement).src = "/logo.webp";
+        }}
       />
     </Link>
   );
@@ -54,65 +66,76 @@ export function AdminLayout() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f6f8fc] text-slate-900">
-      <aside className="fixed inset-y-0 left-0 hidden w-64 border-r border-slate-200 bg-white lg:block">
-        <div className="flex h-[88px] items-center justify-center border-b border-slate-200">
+    <div className="min-h-screen bg-[#f8fafc] text-slate-900 font-sans">
+      <aside className="fixed inset-y-0 left-0 hidden w-64 border-r border-slate-200/80 bg-white lg:block z-30">
+        <div className="flex h-20 items-center justify-center border-b border-slate-100">
           <AdminLogo />
         </div>
-        <nav className="p-5">
-          <p className="mb-4 border-l-4 border-primary pl-3 text-lg font-black uppercase text-slate-950">Quản trị</p>
+        <nav className="p-4">
+          <div className="mb-4 flex items-center gap-2 px-3">
+            <span className="h-4 w-1 rounded-full bg-[#2563eb]" />
+            <span className="text-sm font-bold uppercase tracking-wider text-slate-800">Quản trị</span>
+          </div>
           {resources.map((item) => {
             const Icon = item.icon;
             const current = `${location.pathname}${location.search}`;
-            const isActive = current === item.href;
+            const isActive =
+              current === item.href ||
+              (item.href === "/admin/posts" && (location.pathname === "/admin/posts" || (location.pathname === "/admin/articles" && !location.search.includes("categorySlug=bieu-mau")))) ||
+              (item.href === "/admin/forms" && (location.pathname === "/admin/forms" || (location.pathname === "/admin/articles" && location.search.includes("categorySlug=bieu-mau")))) ||
+              (item.href === "/admin/phones" && (location.pathname === "/admin/phones" || location.pathname === "/admin/leads"));
             return (
               <Link
                 key={item.href}
                 to={item.href}
-                className={`mb-2 flex items-center gap-4 rounded-md px-5 py-4 text-base font-bold transition ${
-                  isActive ? "bg-slate-100 text-primary" : "text-slate-600 hover:bg-slate-50 hover:text-primary"
+                className={`relative mb-1 flex items-center gap-3.5 rounded-lg px-4 py-3 text-sm font-medium transition ${
+                  isActive
+                    ? "bg-[#edf4ff] text-[#2563eb] font-semibold before:absolute before:left-0 before:top-1.5 before:bottom-1.5 before:w-1.5 before:rounded-r-md before:bg-[#2563eb]"
+                    : "text-slate-600 hover:bg-slate-50 hover:text-[#2563eb]"
                 }`}
               >
-                <Icon className="h-5 w-5 text-current" />
-                {item.label}
+                <Icon className={`h-5 w-5 ${isActive ? "text-[#2563eb]" : "text-slate-500"}`} />
+                <span>{item.label}</span>
               </Link>
             );
           })}
         </nav>
-        <div className="absolute bottom-0 left-0 right-0 border-t border-slate-200 px-8 py-5 text-sm font-semibold text-slate-500">
+        <div className="absolute bottom-0 left-0 right-0 border-t border-slate-100 px-6 py-4 text-xs font-medium text-slate-400">
           © 2026 Luật Dân Sự
         </div>
       </aside>
       <main className="lg:pl-64">
-        <header className="flex h-[88px] items-center justify-between border-b border-slate-200 bg-white px-4 md:px-8 shadow-sm">
-          <button
-            onClick={() => setIsMobileMenuOpen(true)}
-            className="inline-flex p-2 text-slate-600 hover:text-primary lg:hidden"
-            aria-label="Open menu"
-          >
-            <Menu className="h-6 w-6" />
-          </button>
-          <span className="hidden sm:inline text-xl md:text-2xl font-black uppercase text-slate-800">
-            Hệ thống quản lý
-          </span>
-          <Link
-            to="/"
-            className="ml-auto inline-flex items-center gap-2 rounded-md border border-slate-200 bg-white px-3 py-2 text-sm font-bold text-primary transition hover:border-primary hover:bg-primary/5 md:px-4"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            <span className="hidden md:inline">Quay về trang web</span>
-          </Link>
-          <div className="ml-3 mr-4 flex items-center gap-2 md:ml-5 md:mr-8 md:gap-4">
-            <span className="flex h-9 w-9 md:h-11 md:w-11 items-center justify-center rounded-full bg-primary/10 text-primary">
-              <UserRound className="h-4 w-4 md:h-5 md:w-5" />
+        <header className="flex h-20 items-center justify-between border-b border-slate-200/80 bg-white px-6 md:px-8">
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setIsMobileMenuOpen(true)}
+              className="inline-flex p-2 text-slate-600 hover:text-primary lg:hidden"
+              aria-label="Open menu"
+            >
+              <Menu className="h-6 w-6" />
+            </button>
+            <span className="text-base md:text-lg font-bold uppercase tracking-wider text-slate-800">
+              Hệ thống quản lý
             </span>
-            <span className="text-sm md:text-lg font-bold text-slate-600">Admin</span>
           </div>
-          <button onClick={logout} className="inline-flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-primary">
-            <LogOut className="h-5 w-5" />
-          </button>
+          
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2.5">
+              <span className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-slate-600">
+                <UserRound className="h-4 w-4" />
+              </span>
+              <span className="text-sm font-semibold text-slate-700">Admin</span>
+            </div>
+            <button
+              onClick={logout}
+              title="Đăng xuất"
+              className="p-1.5 text-slate-400 transition hover:text-slate-700"
+            >
+              <LogOut className="h-5 w-5" />
+            </button>
+          </div>
         </header>
-        <div className="p-4 md:p-8 lg:p-12">
+        <div className="p-6 md:p-8">
           <Outlet />
         </div>
       </main>
@@ -141,11 +164,14 @@ export function AdminLayout() {
           </button>
         </div>
         <nav className="p-5">
-          <p className="mb-4 border-l-4 border-primary pl-3 text-lg font-black uppercase text-slate-950">Quản trị</p>
           {resources.map((item) => {
             const Icon = item.icon;
             const current = `${location.pathname}${location.search}`;
-            const isActive = current === item.href;
+            const isActive =
+              current === item.href ||
+              (item.href === "/admin/posts" && (location.pathname === "/admin/posts" || (location.pathname === "/admin/articles" && !location.search.includes("categorySlug=bieu-mau")))) ||
+              (item.href === "/admin/forms" && (location.pathname === "/admin/forms" || (location.pathname === "/admin/articles" && location.search.includes("categorySlug=bieu-mau")))) ||
+              (item.href === "/admin/phones" && (location.pathname === "/admin/phones" || location.pathname === "/admin/leads"));
             return (
               <Link
                 key={item.href}

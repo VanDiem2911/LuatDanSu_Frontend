@@ -2,10 +2,41 @@ import { api } from "./http";
 import type { ApiEnvelope, Article, Banner, Category, CategoryPagePayload, NavigationPayload, Page, Paginated, Video } from "../types/api";
 import { preloadFirstHtmlImage, preloadOptimizedImage } from "../utils/format";
 
+export type AnalyticsPoint = {
+  date: string;
+  day: number;
+  label: string;
+  current: number;
+  previous: number;
+  unique: number;
+};
+
 export type AdminDashboardData = {
-  counts: Record<"articles" | "leads" | "comments" | "videos", number>;
+  counts: Record<"articles" | "leads" | "comments" | "videos", number> & {
+    views?: number;
+    weekGrowth?: number;
+    thisMonthViews?: number;
+    totalAllTimeViews?: number;
+  };
+  analytics?: {
+    thisWeekViews: number;
+    prevWeekViews: number;
+    weekGrowth: number;
+    thisMonthViews: number;
+    totalArticleViews: number;
+    chartData30: AnalyticsPoint[];
+    chartData7: AnalyticsPoint[];
+  };
   recentLeads: Record<string, unknown>[];
 };
+
+export async function trackVisit(payload: { path: string; articleSlug?: string }) {
+  try {
+    await api.post("/public/track-visit", payload);
+  } catch {
+    // Silently ignore tracking errors
+  }
+}
 
 const staticPageFallbacks: Record<string, Page> = {
   "gioi-thieu": {
@@ -160,4 +191,9 @@ export async function uploadMedia(file: File, folder = "library") {
 export async function getBackupData() {
   const response = await api.get<Record<string, unknown[]>>("/admin/backup");
   return response.data;
+}
+
+export async function sendTestEmail(email?: string) {
+  const response = await api.post<ApiEnvelope<{ success: boolean; recipient: string }>>("/admin/settings/test-email", { email });
+  return response.data.data;
 }

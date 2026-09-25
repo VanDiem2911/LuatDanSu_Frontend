@@ -1,8 +1,9 @@
 import { Search, Menu, X } from "lucide-react";
-import { FormEvent, useState } from "react";
+import { FormEvent, useState, useEffect } from "react";
 import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { FloatingContact } from "../components/FloatingContact";
 import { useNavigation } from "../hooks/useNavigation";
+import { trackVisit } from "../services/cms";
 import type { NavigationPayload } from "../types/api";
 import { settingValue } from "../utils/format";
 
@@ -12,6 +13,7 @@ type SiteSetting = {
   hotline: string;
   email: string;
   logoText: string;
+  logoUrl?: string;
 };
 
 type Office = {
@@ -46,6 +48,15 @@ export function PublicLayout() {
   const location = useLocation();
   const [query, setQuery] = useState("");
   const [menuOpen, setMenuOpen] = useState(false);
+
+  useEffect(() => {
+    const segments = location.pathname.split("/").filter(Boolean);
+    const articleSlug = segments.length >= 2 ? segments[1] : undefined;
+    trackVisit({
+      path: location.pathname,
+      articleSlug
+    });
+  }, [location.pathname]);
   const navigationData = navigation.data ?? fallbackNavigation;
   const site = settingValue<SiteSetting>(navigationData.settings, "site", fallbackSite);
   const offices = settingValue<Office[]>(navigationData.settings, "offices", []);
@@ -78,7 +89,7 @@ export function PublicLayout() {
               className="flex flex-shrink-0 items-center"
               aria-label={site.logoText}
             >
-              <img src="/logo.webp" alt={site.logoText} width={104} height={48} decoding="async" className="h-12 w-auto object-contain" />
+              <img src={site.logoUrl || "/logo.webp"} alt={site.logoText} width={104} height={48} decoding="async" className="h-12 w-auto object-contain" />
             </a>
             <div className="flex flex-row items-center gap-5">
               <nav className="hidden lg:block">

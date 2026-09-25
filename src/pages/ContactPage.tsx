@@ -8,7 +8,7 @@ import { BreadcrumbJsonLd } from "../components/JsonLd";
 import { Seo } from "../components/Seo";
 import type { NavigationPayload } from "../types/api";
 import { settingValue } from "../utils/format";
-import { isValidPhone, PATTERNS, VALIDATION_MESSAGES } from "../utils/validation";
+import { isValidPhone, isValidEmail, PATTERNS, VALIDATION_MESSAGES } from "../utils/validation";
 
 type SiteSetting = {
   name: string;
@@ -74,6 +74,11 @@ export function ContactPage() {
 
     if (trimmedQuestion.length < 5) {
       toast.error("Nội dung câu hỏi phải có ít nhất 5 ký tự.");
+      return;
+    }
+
+    if (trimmedEmail && !isValidEmail(trimmedEmail)) {
+      toast.error(VALIDATION_MESSAGES.email);
       return;
     }
 
@@ -182,6 +187,8 @@ export function ContactPage() {
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       type="email"
+                      pattern={PATTERNS.email}
+                      title={VALIDATION_MESSAGES.email}
                       placeholder="example@mail.com..."
                       className="mt-2 w-full border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm outline-none transition focus:border-primary focus:bg-white rounded"
                     />

@@ -16,6 +16,7 @@ import { ScrollToTop } from "./components/ScrollToTop";
 const AdminLayout = lazy(() => import("./layouts/AdminLayout").then(m => ({ default: m.AdminLayout })));
 const AdminDashboardPage = lazy(() => import("./pages/admin/AdminDashboardPage").then(m => ({ default: m.AdminDashboardPage })));
 const AdminResourcePage = lazy(() => import("./pages/admin/AdminResourcePage").then(m => ({ default: m.AdminResourcePage })));
+const AdminSettingsPage = lazy(() => import("./pages/admin/AdminSettingsPage").then(m => ({ default: m.AdminSettingsPage })));
 const LoginPage = lazy(() => import("./pages/admin/LoginPage").then(m => ({ default: m.LoginPage })));
 
 export function App() {
@@ -50,6 +51,7 @@ export function App() {
         >
           <Route index element={<Navigate to="/admin/dashboard" replace />} />
           <Route path="dashboard" element={<AdminDashboardPage />} />
+          <Route path="settings" element={<AdminSettingsPage />} />
           <Route path=":resource" element={<AdminResourcePage />} />
         </Route>
         <Route path="404" element={<NotFoundPage />} />
