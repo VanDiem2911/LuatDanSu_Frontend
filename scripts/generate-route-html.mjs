@@ -74,6 +74,14 @@ const staticRoutes = [
   "admin",
   "admin/login",
   "admin/dashboard",
+  "admin/settings",
+  "admin/articles",
+  "admin/categories",
+  "admin/banners",
+  "admin/videos",
+  "admin/leads",
+  "admin/comments",
+  "admin/users",
   "404"
 ];
 

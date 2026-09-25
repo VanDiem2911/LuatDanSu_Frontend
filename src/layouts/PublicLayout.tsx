@@ -247,8 +247,8 @@ export function PublicLayout() {
             <div className="mx-auto mt-1.5 h-1 w-16 bg-blue-600 md:mx-0" />
           </div>
           <div className="mb-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {offices.map((office) => (
-              <div key={office.title} className="space-y-1.5">
+            {offices.map((office, idx) => (
+              <div key={idx} className="space-y-1.5">
                 <h4 className="text-[0.8rem] font-bold uppercase tracking-widest text-blue-600">{office.title}</h4>
                 <p className="text-[0.9rem] font-medium leading-relaxed text-slate-700">{office.address}</p>
               </div>
