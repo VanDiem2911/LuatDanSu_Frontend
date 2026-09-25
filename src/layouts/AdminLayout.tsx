@@ -35,7 +35,7 @@ function AdminLogo() {
   const logoUrl = site?.logoUrl || "/logo.webp";
 
   return (
-    <Link to="/admin" className="flex items-center justify-center px-4" aria-label="Luật Dân Sự">
+    <Link to="/" className="flex items-center justify-center px-4 transition hover:opacity-90" aria-label="Trang chủ Luật Dân Sự" title="Về trang chủ">
       <img
         src={logoUrl}
         alt="Luật Dân Sự"
