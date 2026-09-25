@@ -37,6 +37,7 @@ interface SiteValues {
   email: string;
   logoText: string;
   logoUrl: string;
+  footerSlogan?: string;
 }
 
 interface SmtpValues {
@@ -60,7 +61,8 @@ const defaultSite: SiteValues = {
   facebook: "https://www.facebook.com/dudisoftware/",
   email: "congtyluatanp.hcm@gmail.com",
   logoText: "Luật Dân Sự",
-  logoUrl: "/logo.webp"
+  logoUrl: "/logo.webp",
+  footerSlogan: "Hỗ trợ pháp lý toàn diện."
 };
 
 const defaultOffices: OfficeItem[] = [
@@ -312,7 +314,7 @@ export function AdminSettingsPage() {
           }`}
         >
           <MapPin className="h-4 w-4" />
-          <span>Địa chỉ & Văn phòng ({offices.length})</span>
+          <span>Chân trang & Văn phòng ({offices.length})</span>
         </button>
 
         <button

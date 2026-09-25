@@ -14,6 +14,7 @@ type SiteSetting = {
   email: string;
   logoText: string;
   logoUrl?: string;
+  footerSlogan?: string;
 };
 
 type Office = {
@@ -26,8 +27,16 @@ const fallbackSite: SiteSetting = {
   company: "CÔNG TY LUẬT TNHH ANP",
   hotline: "090 360 1234",
   email: "congtyluatanp.hcm@gmail.com",
-  logoText: "Luật Dân Sự"
+  logoText: "Luật Dân Sự",
+  footerSlogan: "Hỗ trợ pháp lý toàn diện."
 };
+
+const fallbackOffices: Office[] = [
+  { title: "Trụ sở chính", address: "Tổ dân phố Viên 3 - Phường Cổ Nhuế 2 - Quận Bắc Từ Liêm - Hà Nội" },
+  { title: "Văn phòng Hà Nội", address: "Tầng 5 Tòa N07, Trần Đăng Ninh, P. Dịch Vọng, Q. Cầu Giấy, TP. Hà Nội" },
+  { title: "Văn phòng TP. HCM", address: "Tầng 1, Số 232 Nguyễn Thị Minh Khai, Phường Xuân Hoà, TP. HCM" },
+  { title: "Văn phòng Đồng Nai", address: "Số 9A Nguyễn Ái Quốc, Khu phố 6, Phường Trấn Biên, TP. Biên Hòa, Tỉnh Đồng Nai" }
+];
 
 const fallbackNavigation: NavigationPayload = {
   menus: [],
@@ -59,7 +68,7 @@ export function PublicLayout() {
   }, [location.pathname]);
   const navigationData = navigation.data ?? fallbackNavigation;
   const site = settingValue<SiteSetting>(navigationData.settings, "site", fallbackSite);
-  const offices = settingValue<Office[]>(navigationData.settings, "offices", []);
+  const offices = settingValue<Office[]>(navigationData.settings, "offices", fallbackOffices);
   const menuItems = [
     { label: "Trang chủ", href: "/" },
     { label: "Tin tức", href: "/tin-tuc" },
@@ -247,7 +256,7 @@ export function PublicLayout() {
           </div>
           <div className="flex flex-col items-center justify-between gap-4 border-t border-slate-100 pt-6 lg:flex-row">
             <p className="order-2 text-[0.8rem] font-medium text-slate-600 lg:order-1">
-              © 2026 {site.name} - Hỗ trợ pháp lý toàn diện.
+              © 2026 {site.name} - {site.footerSlogan || "Hỗ trợ pháp lý toàn diện."}
             </p>
             <div className="order-1 flex flex-wrap items-center justify-center gap-6 lg:order-2">
               <span className="text-[0.85rem] font-bold text-slate-600">{site.email}</span>
