@@ -272,19 +272,29 @@ function VideoSection({ videos }: { videos: Video[] }) {
 
   useEffect(() => {
     let frameId: number;
+    let lastTime = performance.now();
     const container = containerRef.current;
     if (!container) return;
 
-    const scroll = () => {
-      if (isHovered || isDragging || activeVideoId) {
-        frameId = requestAnimationFrame(scroll);
-        return;
+    const scroll = (now: number) => {
+      const delta = (now - lastTime) / 1000;
+      lastTime = now;
+      if (!isHovered && !isDragging && !activeVideoId) {
+        const halfWidth = container.scrollWidth / 2;
+        if (halfWidth > 0) {
+          container.scrollLeft += 35 * Math.min(delta, 0.1);
+          if (container.scrollLeft >= halfWidth) {
+            container.scrollLeft -= halfWidth;
+          }
+        }
       }
-      container.scrollLeft += 0.7;
-      const halfWidth = container.scrollWidth / 2;
-      if (container.scrollLeft >= halfWidth) {
-        container.scrollLeft -= halfWidth;
-      }
+
+
+
+
+
+
+
       frameId = requestAnimationFrame(scroll);
     };
 
@@ -351,8 +361,8 @@ function VideoSection({ videos }: { videos: Video[] }) {
     if (halfWidth <= 0) return;
     if (container.scrollLeft >= halfWidth) {
       container.scrollLeft -= halfWidth;
-    } else if (container.scrollLeft <= 0) {
-      container.scrollLeft += halfWidth;
+
+
     }
   };
 
@@ -360,6 +370,11 @@ function VideoSection({ videos }: { videos: Video[] }) {
     const container = containerRef.current;
     if (!container) return;
     container.scrollBy({ left: amount, behavior: "smooth" });
+  };
+
+  const closeModal = () => {
+    setActiveVideoId(null);
+    setIsHovered(false);
   };
 
   const handleVideoClick = (youtubeId: string, e: React.MouseEvent) => {
@@ -446,7 +461,7 @@ function VideoSection({ videos }: { videos: Video[] }) {
 
       {activeVideoId && (
         <div
-          onClick={() => setActiveVideoId(null)}
+          onClick={closeModal}
           className="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-950/75 p-4 transition-opacity duration-300"
         >
           <div
@@ -461,7 +476,7 @@ function VideoSection({ videos }: { videos: Video[] }) {
               allowFullScreen
             />
             <button
-              onClick={() => setActiveVideoId(null)}
+              onClick={closeModal}
               className="absolute top-4 right-4 flex h-9 w-9 items-center justify-center rounded-full bg-black/60 text-white hover:bg-primary transition hover:scale-105"
               aria-label="Đóng video"
             >
