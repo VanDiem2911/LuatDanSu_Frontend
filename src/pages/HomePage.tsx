@@ -12,7 +12,7 @@ import { Sidebar } from "../components/Sidebar";
 import { ConsultBanner } from "../components/ConsultBanner";
 import { getArticles, getVideos, submitLead } from "../services/cms";
 import type { Article, Category, NavigationPayload, Video } from "../types/api";
-import { formatDate, formatExcerpt, optimizedImageSrcSet, optimizedImageUrl, settingValue } from "../utils/format";
+import { formatDate, formatExcerpt, optimizedImageSrcSet, optimizedImageUrl, settingValue, getArticleThumbnail, isLogoImage } from "../utils/format";
 import { isValidPhone, PATTERNS, VALIDATION_MESSAGES } from "../utils/validation";
 
 function articleHref(article: Article) {
@@ -91,15 +91,18 @@ function ConsultationCard({ image: _image, hotline }: { image?: string; hotline?
 }
 
 
-function HomeLeadArticle({ article, categories }: { article: Article; categories: Category[] }) {
+function HomeLeadArticle({ article, categories, siteLogo }: { article: Article; categories: Category[]; siteLogo?: string }) {
+  const displayImage = getArticleThumbnail(article.image, siteLogo);
+  const isLogo = isLogoImage(displayImage, siteLogo);
+
   return (
     <article>
       <Link to={articleHref(article)} className="group block">
         <div className="aspect-[16/9] overflow-hidden border border-slate-200 bg-slate-100 flex items-center justify-center rounded">
-          {article.image ? (
+          {displayImage ? (
             <img
-              src={optimizedImageUrl(article.image, 800)}
-              srcSet={optimizedImageSrcSet(article.image, [360, 480, 640, 800])}
+              src={optimizedImageUrl(displayImage, 800)}
+              srcSet={optimizedImageSrcSet(displayImage, [360, 480, 640, 800])}
               alt={article.title}
               width={800}
               height={450}
@@ -107,7 +110,7 @@ function HomeLeadArticle({ article, categories }: { article: Article; categories
               decoding="async"
               sizes="(min-width: 1024px) 590px, calc(100vw - 32px)"
               className={`h-full w-full transition group-hover:scale-[1.02] ${
-                article.image.toLowerCase().includes("logo") ? "object-contain bg-white p-3" : "object-cover object-top"
+                isLogo ? "object-contain bg-white p-3" : "object-cover object-top"
               }`}
             />
           ) : null}
@@ -126,38 +129,42 @@ function HomeLeadArticle({ article, categories }: { article: Article; categories
   );
 }
 
-function ThumbnailStrip({ articles, categories }: { articles: Article[]; categories: Category[] }) {
+function ThumbnailStrip({ articles, categories, siteLogo }: { articles: Article[]; categories: Category[]; siteLogo?: string }) {
   return (
     <div className="grid gap-4 border-t border-slate-200 pt-5 sm:grid-cols-3">
-      {articles.map((article) => (
-        <Link key={article._id} to={articleHref(article)} className="group block">
-          <div className="aspect-[16/9] overflow-hidden bg-slate-100 flex items-center justify-center">
-            {article.image ? (
-              <img
-                src={optimizedImageUrl(article.image, 400)}
-                srcSet={optimizedImageSrcSet(article.image, [240, 320, 400])}
-                alt={article.title}
-                width={400}
-                height={225}
-                loading="lazy"
-                decoding="async"
-                sizes="(min-width: 640px) 190px, calc(100vw - 32px)"
-                className={`h-full w-full transition group-hover:scale-105 ${
-                  article.image.toLowerCase().includes("logo") ? "object-contain bg-white p-2" : "object-cover object-top"
-                }`}
-              />
-            ) : null}
-          </div>
-          <div className="pt-3">
-            <span className="text-[0.7rem] font-bold uppercase tracking-wide text-primary">
-              {categoryLabel(categories, article.categorySlug)}
-            </span>
-            <h3 className="mt-1 line-clamp-2 text-base font-extrabold leading-6 text-slate-800 group-hover:text-primary">
-              {article.title}
-            </h3>
-          </div>
-        </Link>
-      ))}
+      {articles.map((article) => {
+        const displayImage = getArticleThumbnail(article.image, siteLogo);
+        const isLogo = isLogoImage(displayImage, siteLogo);
+        return (
+          <Link key={article._id} to={articleHref(article)} className="group block">
+            <div className="aspect-[16/9] overflow-hidden bg-slate-100 flex items-center justify-center">
+              {displayImage ? (
+                <img
+                  src={optimizedImageUrl(displayImage, 400)}
+                  srcSet={optimizedImageSrcSet(displayImage, [240, 320, 400])}
+                  alt={article.title}
+                  width={400}
+                  height={225}
+                  loading="lazy"
+                  decoding="async"
+                  sizes="(min-width: 640px) 190px, calc(100vw - 32px)"
+                  className={`h-full w-full transition group-hover:scale-105 ${
+                    isLogo ? "object-contain bg-white p-2" : "object-cover object-top"
+                  }`}
+                />
+              ) : null}
+            </div>
+            <div className="pt-3">
+              <span className="text-[0.7rem] font-bold uppercase tracking-wide text-primary">
+                {categoryLabel(categories, article.categorySlug)}
+              </span>
+              <h3 className="mt-1 line-clamp-2 text-base font-extrabold leading-6 text-slate-800 group-hover:text-primary">
+                {article.title}
+              </h3>
+            </div>
+          </Link>
+        );
+      })}
     </div>
   );
 }
@@ -181,14 +188,17 @@ function FormMiniCard({ article, categories }: { article: Article; categories: C
   );
 }
 
-function NewsRow({ article, categories }: { article: Article; categories: Category[] }) {
+function NewsRow({ article, categories, siteLogo }: { article: Article; categories: Category[]; siteLogo?: string }) {
+  const displayImage = getArticleThumbnail(article.image, siteLogo);
+  const isLogo = isLogoImage(displayImage, siteLogo);
+
   return (
     <Link to={articleHref(article)} className="group grid gap-5 border-b border-slate-200 py-4 first:pt-0 sm:grid-cols-[210px_1fr]">
       <div className="aspect-[16/10] overflow-hidden bg-slate-100 flex items-center justify-center rounded">
-        {article.image ? (
+        {displayImage ? (
           <img
-            src={optimizedImageUrl(article.image, 320)}
-            srcSet={optimizedImageSrcSet(article.image, [240, 320, 480])}
+            src={optimizedImageUrl(displayImage, 320)}
+            srcSet={optimizedImageSrcSet(displayImage, [240, 320, 480])}
             alt={article.title}
             width={320}
             height={200}
@@ -196,7 +206,7 @@ function NewsRow({ article, categories }: { article: Article; categories: Catego
             decoding="async"
             sizes="(min-width: 640px) 210px, calc(100vw - 32px)"
             className={`h-full w-full transition group-hover:scale-105 ${
-              article.image.toLowerCase().includes("logo") ? "object-contain bg-white p-2.5" : "object-cover object-top"
+              isLogo ? "object-contain bg-white p-2.5" : "object-cover object-top"
             }`}
           />
         ) : null}
@@ -568,7 +578,8 @@ export function HomePage() {
   const thumbnailArticles = useMemo(() => remainingTopicArticles.slice(1, 4), [remainingTopicArticles]);
   const newsArticles = useMemo(() => topicArticles.slice(0, 6), [topicArticles]);
   const questionArticles = questions.data?.data ?? [];
-  const site = settingValue<{ hotline?: string; zalo?: string; description?: string }>(navigation?.settings, "site", {});
+  const site = settingValue<{ hotline?: string; zalo?: string; description?: string; logoUrl?: string }>(navigation?.settings, "site", {});
+  const siteLogo = site?.logoUrl;
 
   return (
     <>
@@ -591,8 +602,8 @@ export function HomePage() {
         ) : (
           <section className="grid gap-8 lg:grid-cols-[1.65fr_0.72fr_0.82fr]">
             <div>
-              <HomeLeadArticle article={leadArticle} categories={navigation.categories} />
-              <ThumbnailStrip articles={thumbnailArticles} categories={navigation.categories} />
+              <HomeLeadArticle article={leadArticle} categories={navigation.categories} siteLogo={siteLogo} />
+              <ThumbnailStrip articles={thumbnailArticles} categories={navigation.categories} siteLogo={siteLogo} />
             </div>
             <ShortArticleList articles={headlineArticles} categories={navigation.categories} />
             <ConsultationCard hotline={site?.hotline} />
@@ -622,7 +633,7 @@ export function HomePage() {
               <SectionHeading title="Tin tức nổi bật" href="/tin-tuc" linkLabel="Xem tất cả tin tức" />
               <div>
                 {newsArticles.map((article) => (
-                  <NewsRow key={article._id} article={article} categories={navigation.categories} />
+                  <NewsRow key={article._id} article={article} categories={navigation.categories} siteLogo={siteLogo} />
                 ))}
               </div>
             </div>

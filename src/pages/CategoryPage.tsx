@@ -12,7 +12,7 @@ import { getArticles, getCategoryPage } from "../services/cms";
 import { queryKeys } from "../services/queryKeys";
 import { ChevronRight, Play, Scale, Search, Zap } from "lucide-react";
 import type { Article, Category, NavigationPayload } from "../types/api";
-import { formatExcerpt, optimizedImageSrcSet, optimizedImageUrl, settingValue } from "../utils/format";
+import { formatExcerpt, optimizedImageSrcSet, optimizedImageUrl, settingValue, getArticleThumbnail, isLogoImage } from "../utils/format";
 
 const headingCopy: Record<string, { title: string; description: string }> = {
   "tin-tuc": {
@@ -87,15 +87,18 @@ function ConsultationCard({ image: _image, hotline }: { image?: string; hotline?
 }
 
 
-function TopStory({ article, category }: { article: Article; category: Category }) {
+function TopStory({ article, category, siteLogo }: { article: Article; category: Category; siteLogo?: string }) {
+  const displayImage = getArticleThumbnail(article.image, siteLogo);
+  const isLogo = isLogoImage(displayImage, siteLogo);
+
   return (
     <article>
       <Link to={href(article)} className="group block">
         <div className="aspect-[16/9] overflow-hidden bg-slate-100 flex items-center justify-center rounded">
-          {article.image ? (
+          {displayImage ? (
             <img
-              src={optimizedImageUrl(article.image, 800)}
-              srcSet={optimizedImageSrcSet(article.image, [360, 480, 640, 800])}
+              src={optimizedImageUrl(displayImage, 800)}
+              srcSet={optimizedImageSrcSet(displayImage, [360, 480, 640, 800])}
               alt={article.title}
               width={800}
               height={450}
@@ -103,7 +106,7 @@ function TopStory({ article, category }: { article: Article; category: Category 
               decoding="async"
               sizes="(min-width: 1024px) 590px, calc(100vw - 32px)"
               className={`h-full w-full transition group-hover:scale-[1.02] ${
-                article.image.toLowerCase().includes("logo") ? "object-contain bg-white p-3" : "object-cover object-top"
+                isLogo ? "object-contain bg-white p-3" : "object-cover object-top"
               }`}
             />
           ) : null}
@@ -120,34 +123,38 @@ function TopStory({ article, category }: { article: Article; category: Category 
   );
 }
 
-function SmallFeatureGrid({ articles, category }: { articles: Article[]; category: Category }) {
+function SmallFeatureGrid({ articles, category, siteLogo }: { articles: Article[]; category: Category; siteLogo?: string }) {
   return (
     <div className="grid gap-4 border-t border-slate-200 pt-5 sm:grid-cols-3">
-      {articles.map((article) => (
-        <Link key={article._id} to={href(article)} className="group block">
-          <div className="aspect-[16/9] overflow-hidden bg-slate-100 flex items-center justify-center">
-            {article.image ? (
-              <img
-                src={optimizedImageUrl(article.image, 400)}
-                srcSet={optimizedImageSrcSet(article.image, [240, 320, 400])}
-                alt={article.title}
-                width={400}
-                height={225}
-                loading="lazy"
-                decoding="async"
-                sizes="(min-width: 640px) 190px, calc(100vw - 32px)"
-                className={`h-full w-full transition group-hover:scale-105 ${
-                  article.image.toLowerCase().includes("logo") ? "object-contain bg-white p-2" : "object-cover object-top"
-                }`}
-              />
-            ) : null}
-          </div>
-          <div className="pt-3">
-            <span className="text-[0.68rem] font-bold uppercase tracking-wide text-primary">{labelFor(category)}</span>
-            <h3 className="mt-1 line-clamp-2 text-sm font-black leading-5 text-slate-900 group-hover:text-primary">{article.title}</h3>
-          </div>
-        </Link>
-      ))}
+      {articles.map((article) => {
+        const displayImage = getArticleThumbnail(article.image, siteLogo);
+        const isLogo = isLogoImage(displayImage, siteLogo);
+        return (
+          <Link key={article._id} to={href(article)} className="group block">
+            <div className="aspect-[16/9] overflow-hidden bg-slate-100 flex items-center justify-center">
+              {displayImage ? (
+                <img
+                  src={optimizedImageUrl(displayImage, 400)}
+                  srcSet={optimizedImageSrcSet(displayImage, [240, 320, 400])}
+                  alt={article.title}
+                  width={400}
+                  height={225}
+                  loading="lazy"
+                  decoding="async"
+                  sizes="(min-width: 640px) 190px, calc(100vw - 32px)"
+                  className={`h-full w-full transition group-hover:scale-105 ${
+                    isLogo ? "object-contain bg-white p-2" : "object-cover object-top"
+                  }`}
+                />
+              ) : null}
+            </div>
+            <div className="pt-3">
+              <span className="text-[0.68rem] font-bold uppercase tracking-wide text-primary">{labelFor(category)}</span>
+              <h3 className="mt-1 line-clamp-2 text-sm font-black leading-5 text-slate-900 group-hover:text-primary">{article.title}</h3>
+            </div>
+          </Link>
+        );
+      })}
     </div>
   );
 }
@@ -165,14 +172,17 @@ function HeadlineList({ articles, category }: { articles: Article[]; category: C
   );
 }
 
-function ArticleRow({ article, category, question = false }: { article: Article; category: Category; question?: boolean }) {
+function ArticleRow({ article, category, question = false, siteLogo }: { article: Article; category: Category; question?: boolean; siteLogo?: string }) {
+  const displayImage = getArticleThumbnail(article.image, siteLogo);
+  const isLogo = isLogoImage(displayImage, siteLogo);
+
   return (
     <Link to={href(article)} className="group grid gap-5 border-b border-slate-200 py-5 first:pt-0 sm:grid-cols-[230px_1fr]">
       <div className="aspect-[16/10] overflow-hidden bg-slate-100 flex items-center justify-center rounded">
-        {article.image ? (
+        {displayImage ? (
           <img
-            src={optimizedImageUrl(article.image, 320)}
-            srcSet={optimizedImageSrcSet(article.image, [240, 320, 480])}
+            src={optimizedImageUrl(displayImage, 320)}
+            srcSet={optimizedImageSrcSet(displayImage, [240, 320, 480])}
             alt={article.title}
             width={320}
             height={200}
@@ -180,7 +190,7 @@ function ArticleRow({ article, category, question = false }: { article: Article;
             decoding="async"
             sizes="(min-width: 640px) 230px, calc(100vw - 32px)"
             className={`h-full w-full transition group-hover:scale-105 ${
-              article.image.toLowerCase().includes("logo") ? "object-contain bg-white p-2.5" : "object-cover object-top"
+              isLogo ? "object-contain bg-white p-2.5" : "object-cover object-top"
             }`}
           />
         ) : null}
@@ -297,7 +307,8 @@ export function CategoryPage() {
   
   const [search, setSearch] = useState("");
   const navigation = useOutletContext<NavigationPayload>();
-  const site = settingValue<{ hotline?: string; zalo?: string }>(navigation?.settings, "site", {});
+  const site = settingValue<{ hotline?: string; zalo?: string; logoUrl?: string }>(navigation?.settings, "site", {});
+  const siteLogo = site?.logoUrl;
   const categoryPage = useQuery({
     queryKey: queryKeys.categoryPage(categorySlug),
     queryFn: () => getCategoryPage(categorySlug),
@@ -374,12 +385,12 @@ export function CategoryPage() {
           <section className="mb-14 grid min-h-[650px] grid-cols-1 gap-8 lg:grid-cols-[1.55fr_0.7fr_0.8fr]">
             <div>
               {lead ? (
-                <TopStory article={lead} category={category} />
+                <TopStory article={lead} category={category} siteLogo={siteLogo} />
               ) : (
                 <div className="aspect-[16/9] w-full skeleton-block rounded mb-4" />
               )}
               {thumbnails.length > 0 ? (
-                <SmallFeatureGrid articles={thumbnails} category={category} />
+                <SmallFeatureGrid articles={thumbnails} category={category} siteLogo={siteLogo} />
               ) : (
                 <div className="grid gap-4 border-t border-slate-200 pt-5 sm:grid-cols-3">
                   <div className="aspect-[16/9] skeleton-block rounded" />
@@ -410,7 +421,7 @@ export function CategoryPage() {
               <>
                 <div>
                   {activeArticles?.data.map((article) => (
-                    <ArticleRow key={article._id} article={article} category={category} question={isQuestionPage} />
+                    <ArticleRow key={article._id} article={article} category={category} question={isQuestionPage} siteLogo={siteLogo} />
                   ))}
                 </div>
                 <Pagination page={page} totalPages={activeArticles?.meta.totalPages ?? 1} onChange={handlePageChange} />

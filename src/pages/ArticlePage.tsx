@@ -12,7 +12,7 @@ import { Sidebar } from "../components/Sidebar";
 import { getArticle } from "../services/cms";
 import { queryKeys } from "../services/queryKeys";
 import type { NavigationPayload } from "../types/api";
-import { formatDate, optimizedImageSrcSet, optimizedImageUrl, optimizeHtmlImages } from "../utils/format";
+import { formatDate, optimizedImageSrcSet, optimizedImageUrl, optimizeHtmlImages, isLogoImage, settingValue } from "../utils/format";
 
 const SITE_URL = "https://luatdansu.vercel.app";
 
@@ -29,6 +29,10 @@ export function ArticlePage() {
   if (article.isLoading) return <Loading variant="article" />;
   if (article.isError || !article.data) return <ErrorState title="Không tìm thấy bài viết" />;
 
+  const site = settingValue<{ logoUrl?: string }>(navigation?.settings, "site", {});
+  const siteLogo = site?.logoUrl || `${SITE_URL}/logo.webp`;
+  const isLogo = isLogoImage(article.data.image, site?.logoUrl);
+
   const category = navigation.categories.find((item) => item.slug === article.data.categorySlug);
   const articleUrl = `${SITE_URL}/${article.data.categorySlug}/${article.data.slug || article.data._id}`;
 
@@ -40,7 +44,7 @@ export function ArticlePage() {
       "@id": articleUrl
     },
     headline: article.data.title,
-    image: article.data.image ? [article.data.image] : [`${SITE_URL}/logo.webp`],
+    image: article.data.image && !isLogo ? [article.data.image] : [siteLogo],
     datePublished: article.data.publishedAt || article.data.createdAt,
     dateModified: article.data.updatedAt || article.data.publishedAt || article.data.createdAt,
     author: [{ "@type": "Organization", name: "Luật ANP", url: SITE_URL }],
@@ -50,7 +54,7 @@ export function ArticlePage() {
       url: SITE_URL,
       logo: {
         "@type": "ImageObject",
-        url: `${SITE_URL}/logo.webp`
+        url: siteLogo
       }
     },
     description: article.data.excerpt
@@ -66,7 +70,7 @@ export function ArticlePage() {
       <Seo
         title={article.data.seo?.metaTitle ?? `${article.data.title} | Luật Dân Sự`}
         description={article.data.seo?.metaDescription ?? article.data.excerpt}
-        image={article.data.image}
+        image={!isLogo ? article.data.image : siteLogo}
         type="article"
       />
       <BreadcrumbJsonLd items={breadcrumbItems} />
@@ -99,7 +103,7 @@ export function ArticlePage() {
       <main className="container-page py-12">
         <div className="grid grid-cols-1 gap-12 lg:grid-cols-12">
           <article className="min-w-0 lg:col-span-8">
-            {article.data.image ? (
+            {article.data.image && !isLogo ? (
               <div className="mb-8 aspect-video w-full overflow-hidden flex items-center justify-center bg-slate-100">
                 <img
                   src={optimizedImageUrl(article.data.image, 800)}
@@ -110,9 +114,7 @@ export function ArticlePage() {
                   fetchPriority="high"
                   decoding="async"
                   sizes="(min-width: 1024px) 760px, calc(100vw - 32px)"
-                  className={`h-full w-full ${
-                    article.data.image.toLowerCase().includes("logo") ? "object-contain bg-white p-6" : "object-cover"
-                  }`}
+                  className="h-full w-full object-cover"
                 />
               </div>
             ) : null}

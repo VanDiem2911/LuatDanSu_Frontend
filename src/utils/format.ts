@@ -72,8 +72,11 @@ export function preloadFirstHtmlImage(html?: string, width = 900) {
 export function optimizeHtmlImages(html?: string, width = 800, priorityFirst = false) {
   if (!html || typeof document === "undefined") return html ?? "";
 
+  // Normalize non-breaking spaces to standard space so words don't get glued and broken mid-word
+  const normalizedHtml = html.replace(/&nbsp;/g, " ").replace(/\u00a0/g, " ");
+
   const doc = document.implementation.createHTMLDocument("");
-  doc.body.innerHTML = html;
+  doc.body.innerHTML = normalizedHtml;
   doc.body.querySelectorAll("img").forEach((image, index) => {
     const src = image.getAttribute("src");
     if (src) {
@@ -105,4 +108,20 @@ export function formatExcerpt(text?: string, fallback = ""): string {
     return trimmed;
   }
   return `${trimmed}...`;
+}
+
+export function isLogoImage(image?: string, siteLogoUrl?: string): boolean {
+  if (!image) return true;
+  const lower = image.toLowerCase();
+  if (lower.includes("logo") || lower.includes("luatdansu.net/logo")) return true;
+  if (siteLogoUrl && (image === siteLogoUrl || lower === siteLogoUrl.toLowerCase())) return true;
+  return false;
+}
+
+export function getArticleThumbnail(image?: string, siteLogoUrl?: string): string {
+  if (!image) return siteLogoUrl || "/logo.webp";
+  if (isLogoImage(image, siteLogoUrl)) {
+    return siteLogoUrl || "/logo.webp";
+  }
+  return image;
 }

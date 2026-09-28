@@ -1,7 +1,8 @@
 import { Calendar, ChevronRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import type { Article, Category } from "../types/api";
-import { formatDate, formatExcerpt, optimizedImageSrcSet, optimizedImageUrl } from "../utils/format";
+import { formatDate, formatExcerpt, optimizedImageSrcSet, optimizedImageUrl, getArticleThumbnail, isLogoImage, settingValue } from "../utils/format";
+import { useNavigation } from "../hooks/useNavigation";
 
 type Props = {
   article: Article;
@@ -12,15 +13,19 @@ type Props = {
 
 export function ArticleCard({ article, category, compact = false, priority = false }: Props) {
   const href = `/${article.categorySlug}/${article.slug || article._id}`;
+  const navigation = useNavigation();
+  const site = settingValue<{ logoUrl?: string }>(navigation.data?.settings, "site", {});
+  const displayImage = getArticleThumbnail(article.image, site.logoUrl);
+  const isLogo = isLogoImage(displayImage, site.logoUrl);
 
   if (compact) {
     return (
       <Link to={href} className="group flex gap-3 border-b border-slate-100 py-3 last:border-b-0">
         <div className="h-16 w-20 flex-shrink-0 overflow-hidden bg-slate-100 flex items-center justify-center">
-          {article.image ? (
+          {displayImage ? (
             <img
-              src={optimizedImageUrl(article.image, 160)}
-              srcSet={optimizedImageSrcSet(article.image, [80, 120, 160])}
+              src={optimizedImageUrl(displayImage, 160)}
+              srcSet={optimizedImageSrcSet(displayImage, [80, 120, 160])}
               alt={article.title}
               width={80}
               height={64}
@@ -28,7 +33,7 @@ export function ArticleCard({ article, category, compact = false, priority = fal
               loading="lazy"
               sizes="80px"
               className={`h-full w-full ${
-                article.image.toLowerCase().includes("logo") ? "object-contain bg-white p-1.5" : "object-cover object-top"
+                isLogo ? "object-contain bg-white p-1.5" : "object-cover object-top"
               }`}
             />
           ) : null}
@@ -47,10 +52,10 @@ export function ArticleCard({ article, category, compact = false, priority = fal
     <article className="group bg-white transition-shadow hover:shadow-soft">
       <Link to={href} className="block">
         <div className="aspect-[16/9] overflow-hidden bg-slate-100 flex items-center justify-center">
-          {article.image ? (
+          {displayImage ? (
             <img
-              src={optimizedImageUrl(article.image, 400)}
-              srcSet={optimizedImageSrcSet(article.image, [280, 320, 400, 640])}
+              src={optimizedImageUrl(displayImage, 400)}
+              srcSet={optimizedImageSrcSet(displayImage, [280, 320, 400, 640])}
               alt={article.title}
               width={400}
               height={225}
@@ -59,7 +64,7 @@ export function ArticleCard({ article, category, compact = false, priority = fal
               fetchPriority={priority ? "high" : undefined}
               sizes="(min-width: 1024px) 400px, (min-width: 768px) 50vw, calc(100vw - 32px)"
               className={`h-full w-full transition-transform duration-300 group-hover:scale-105 ${
-                article.image.toLowerCase().includes("logo") ? "object-contain bg-white p-3" : "object-cover object-top"
+                isLogo ? "object-contain bg-white p-3" : "object-cover object-top"
               }`}
             />
           ) : null}
