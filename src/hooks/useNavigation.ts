@@ -6,8 +6,8 @@ export function useNavigation() {
   return useQuery({
     queryKey: queryKeys.navigation,
     queryFn: getNavigation,
-    staleTime: 0,
-    refetchOnWindowFocus: true,
-    gcTime: 60_000
+    staleTime: 30_000,
+    refetchOnWindowFocus: false,
+    gcTime: 5 * 60_000
   });
 }
