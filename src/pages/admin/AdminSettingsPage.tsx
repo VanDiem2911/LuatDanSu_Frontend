@@ -96,6 +96,8 @@ export function AdminSettingsPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [testEmailAddress, setTestEmailAddress] = useState("");
   const [isTestingEmail, setIsTestingEmail] = useState(false);
+  // Separate input state to avoid img 404 spam on every keystroke
+  const [logoUrlInput, setLogoUrlInput] = useState("");
 
   // Fetch settings from API
   const settingsQuery = useQuery({
@@ -108,11 +110,13 @@ export function AdminSettingsPage() {
       const items = settingsQuery.data.data;
       const siteSetting = items.find((item: any) => item.key === "site");
       if (siteSetting && typeof siteSetting.value === "object") {
+        const newLogoUrl = (siteSetting.value as any)?.logoUrl || "/logo.webp";
         setSite((prev) => ({
           ...prev,
           ...(siteSetting.value as Partial<SiteValues>),
-          logoUrl: (siteSetting.value as any)?.logoUrl || prev.logoUrl || "/logo.webp"
+          logoUrl: newLogoUrl
         }));
+        setLogoUrlInput(newLogoUrl);
       }
 
       const officesSetting = items.find((item: any) => item.key === "offices");
@@ -140,6 +144,7 @@ export function AdminSettingsPage() {
       const res = await uploadMedia(file, "logo");
       if (res.url) {
         setSite((prev) => ({ ...prev, logoUrl: res.url }));
+        setLogoUrlInput(res.url);
         toast.success("Tải ảnh logo lên thành công!");
       }
     } catch (err) {
@@ -375,7 +380,10 @@ export function AdminSettingsPage() {
 
                 <button
                   type="button"
-                  onClick={() => setSite((prev) => ({ ...prev, logoUrl: "/logo.webp" }))}
+                  onClick={() => {
+                    setSite((prev) => ({ ...prev, logoUrl: "/logo.webp" }));
+                    setLogoUrlInput("/logo.webp");
+                  }}
                   className="text-xs text-slate-400 hover:text-slate-600 text-center py-1 font-medium transition"
                 >
                   Đặt về logo mặc định (/logo.webp)
@@ -388,11 +396,23 @@ export function AdminSettingsPage() {
                 </label>
                 <input
                   type="text"
-                  value={site.logoUrl}
-                  onChange={(e) => setSite((prev) => ({ ...prev, logoUrl: e.target.value }))}
+                  value={logoUrlInput}
+                  onChange={(e) => setLogoUrlInput(e.target.value)}
+                  onBlur={() => {
+                    const trimmed = logoUrlInput.trim();
+                    if (trimmed) setSite((prev) => ({ ...prev, logoUrl: trimmed }));
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      const trimmed = logoUrlInput.trim();
+                      if (trimmed) setSite((prev) => ({ ...prev, logoUrl: trimmed }));
+                      (e.target as HTMLInputElement).blur();
+                    }
+                  }}
                   placeholder="https://... hoặc /logo.webp"
                   className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs font-medium text-slate-800 outline-none focus:border-[#2563eb]"
                 />
+                <p className="mt-1 text-[11px] text-slate-400">Nhấn Enter hoặc click ra ngoài để xem trước logo.</p>
               </div>
             </div>
 
