@@ -93,7 +93,7 @@ export function optimizeHtmlImages(html?: string, width = 800, priorityFirst = f
       image.setAttribute("alt", image.getAttribute("title") || "Hình minh họa bài viết");
     }
   });
-
+  return doc.body.innerHTML;
 }
 
 export function formatExcerpt(text?: string, fallback = ""): string {

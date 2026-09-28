@@ -118,7 +118,7 @@ export function ArticlePage() {
             ) : null}
             <div
               className="prose-content"
-              dangerouslySetInnerHTML={{ __html: articleContent || "" }}
+              dangerouslySetInnerHTML={{ __html: articleContent || article.data?.content || "" }}
             />
             {article.data.fileUrl ? (
               <div className="my-8 rounded-lg border border-blue-100 bg-blue-50/50 p-5 flex items-center justify-between gap-4">
