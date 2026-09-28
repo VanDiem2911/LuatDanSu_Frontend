@@ -105,7 +105,7 @@ export function AdminLayout() {
         </div>
       </aside>
       <main className="lg:pl-64">
-        <header className="flex h-20 items-center justify-between border-b border-slate-200/80 bg-white px-6 md:px-8">
+        <header className="sticky top-0 z-20 flex h-20 items-center justify-between border-b border-slate-200/80 bg-white/95 backdrop-blur-md px-6 md:px-8 shadow-xs">
           <div className="flex items-center gap-3">
             <button
               onClick={() => setIsMobileMenuOpen(true)}

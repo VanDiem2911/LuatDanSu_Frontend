@@ -30,7 +30,7 @@ export function StaticPage({ slug }: { slug: string }) {
         <Breadcrumb items={[{ label: page.data.title }]} />
         <article className="max-w-3xl bg-white p-8">
           <h1 className="mb-6 text-4xl font-bold text-ink">{page.data.title}</h1>
-          <div className="prose-content" dangerouslySetInnerHTML={{ __html: pageContent }} />
+          <div className="prose-content" dangerouslySetInnerHTML={{ __html: pageContent || "" }} />
         </article>
       </main>
     </>

@@ -1,4 +1,4 @@
-import { BriefcaseBusiness, Calendar, ChevronRight, FileText, Play, Scale, Zap, Heart, Home, Coins, X } from "lucide-react";
+import { BriefcaseBusiness, Calendar, ChevronLeft, ChevronRight, FileText, Play, Scale, Zap, Heart, Home, Coins, X } from "lucide-react";
 import { FormEvent, useMemo, useState, useEffect, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link, useOutletContext } from "react-router-dom";
@@ -12,7 +12,7 @@ import { Sidebar } from "../components/Sidebar";
 import { ConsultBanner } from "../components/ConsultBanner";
 import { getArticles, getVideos, submitLead } from "../services/cms";
 import type { Article, Category, NavigationPayload, Video } from "../types/api";
-import { formatDate, optimizedImageSrcSet, optimizedImageUrl } from "../utils/format";
+import { formatDate, formatExcerpt, optimizedImageSrcSet, optimizedImageUrl, settingValue } from "../utils/format";
 import { isValidPhone, PATTERNS, VALIDATION_MESSAGES } from "../utils/validation";
 
 function articleHref(article: Article) {
@@ -54,7 +54,9 @@ function ShortArticleList({ articles, categories }: { articles: Article[]; categ
   );
 }
 
-function ConsultationCard({ image: _image }: { image?: string }) {
+function ConsultationCard({ image: _image, hotline }: { image?: string; hotline?: string }) {
+  const phone = hotline || "090 360 1234";
+  const rawPhone = phone.replace(/\D/g, "") || "0903601234";
   return (
     <aside className="flex flex-col border border-slate-200 bg-white px-6 py-6 text-center gap-4">
       <div className="mx-auto flex h-14 w-14 items-center justify-center text-primary">
@@ -79,8 +81,8 @@ function ConsultationCard({ image: _image }: { image?: string }) {
         >
           Đăng ký ngay
         </Link>
-        <a href="tel:0903601234" className="rounded-full border border-slate-200 py-2.5 text-xs font-black text-primary hover:bg-slate-50">
-          Gọi 090 360 1234
+        <a href={`tel:${rawPhone}`} className="rounded-full border border-slate-200 py-2.5 text-xs font-black text-primary hover:bg-slate-50">
+          Gọi {phone}
         </a>
         <p className="mt-1 text-[0.65rem] font-black uppercase tracking-[0.18em] text-slate-600">* Hỗ trợ 24/7, bảo mật</p>
       </div>
@@ -93,19 +95,19 @@ function HomeLeadArticle({ article, categories }: { article: Article; categories
   return (
     <article>
       <Link to={articleHref(article)} className="group block">
-        <div className="aspect-[16/7] overflow-hidden border border-slate-200 bg-slate-100 flex items-center justify-center">
+        <div className="aspect-[16/9] overflow-hidden border border-slate-200 bg-slate-100 flex items-center justify-center rounded">
           {article.image ? (
             <img
               src={optimizedImageUrl(article.image, 800)}
               srcSet={optimizedImageSrcSet(article.image, [360, 480, 640, 800])}
               alt={article.title}
               width={800}
-              height={350}
+              height={450}
               fetchPriority="high"
               decoding="async"
               sizes="(min-width: 1024px) 590px, calc(100vw - 32px)"
               className={`h-full w-full transition group-hover:scale-[1.02] ${
-                article.image.toLowerCase().includes("logo") ? "object-contain bg-white p-3" : "object-cover"
+                article.image.toLowerCase().includes("logo") ? "object-contain bg-white p-3" : "object-cover object-top"
               }`}
             />
           ) : null}
@@ -117,7 +119,7 @@ function HomeLeadArticle({ article, categories }: { article: Article; categories
           <h2 className="mt-2 text-[1.65rem] font-black leading-tight text-slate-950 transition group-hover:text-primary md:text-[2rem]">
             {article.title}
           </h2>
-          <p className="mt-3 line-clamp-2 text-[1rem] font-medium leading-7 text-slate-500">{article.excerpt}</p>
+          <p className="mt-3 line-clamp-2 text-[1rem] font-medium leading-7 text-slate-500">{formatExcerpt(article.excerpt)}</p>
         </div>
       </Link>
     </article>
@@ -141,7 +143,7 @@ function ThumbnailStrip({ articles, categories }: { articles: Article[]; categor
                 decoding="async"
                 sizes="(min-width: 640px) 190px, calc(100vw - 32px)"
                 className={`h-full w-full transition group-hover:scale-105 ${
-                  article.image.toLowerCase().includes("logo") ? "object-contain bg-white p-2" : "object-cover"
+                  article.image.toLowerCase().includes("logo") ? "object-contain bg-white p-2" : "object-cover object-top"
                 }`}
               />
             ) : null}
@@ -173,7 +175,7 @@ function FormMiniCard({ article, categories }: { article: Article; categories: C
         <span className="mt-1 block line-clamp-2 text-sm font-black leading-5 text-slate-800 group-hover:text-primary">
           {article.title}
         </span>
-        <span className="mt-1 block line-clamp-2 text-xs font-medium leading-5 text-slate-500">{article.excerpt}</span>
+        <span className="mt-1 block line-clamp-2 text-xs font-medium leading-5 text-slate-500">{formatExcerpt(article.excerpt)}</span>
       </span>
     </Link>
   );
@@ -182,7 +184,7 @@ function FormMiniCard({ article, categories }: { article: Article; categories: C
 function NewsRow({ article, categories }: { article: Article; categories: Category[] }) {
   return (
     <Link to={articleHref(article)} className="group grid gap-5 border-b border-slate-200 py-4 first:pt-0 sm:grid-cols-[210px_1fr]">
-      <div className="aspect-[16/10] overflow-hidden bg-slate-100 flex items-center justify-center">
+      <div className="aspect-[16/10] overflow-hidden bg-slate-100 flex items-center justify-center rounded">
         {article.image ? (
           <img
             src={optimizedImageUrl(article.image, 320)}
@@ -194,7 +196,7 @@ function NewsRow({ article, categories }: { article: Article; categories: Catego
             decoding="async"
             sizes="(min-width: 640px) 210px, calc(100vw - 32px)"
             className={`h-full w-full transition group-hover:scale-105 ${
-              article.image.toLowerCase().includes("logo") ? "object-contain bg-white p-2.5" : "object-cover"
+              article.image.toLowerCase().includes("logo") ? "object-contain bg-white p-2.5" : "object-cover object-top"
             }`}
           />
         ) : null}
@@ -208,7 +210,7 @@ function NewsRow({ article, categories }: { article: Article; categories: Catego
           </span>
         </div>
         <h3 className="line-clamp-2 text-xl font-black leading-7 text-slate-900 group-hover:text-primary">{article.title}</h3>
-        <p className="mt-2 line-clamp-2 text-sm font-medium leading-6 text-slate-500">{article.excerpt}</p>
+        <p className="mt-2 line-clamp-2 text-sm font-medium leading-6 text-slate-500">{formatExcerpt(article.excerpt)}</p>
       </div>
     </Link>
   );
@@ -264,6 +266,7 @@ function VideoSection({ videos }: { videos: Video[] }) {
   const [scrollLeftState, setScrollLeftState] = useState(0);
   const dragThreshold = 5;
   const [dragDistance, setDragDistance] = useState(0);
+  const touchPauseTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const marqueeVideos = [...videos, ...videos];
 
@@ -286,7 +289,12 @@ function VideoSection({ videos }: { videos: Video[] }) {
     };
 
     frameId = requestAnimationFrame(scroll);
-    return () => cancelAnimationFrame(frameId);
+    return () => {
+      cancelAnimationFrame(frameId);
+      if (touchPauseTimeoutRef.current) {
+        clearTimeout(touchPauseTimeoutRef.current);
+      }
+    };
   }, [isHovered, isDragging, activeVideoId]);
 
   const handleMouseDown = (e: React.MouseEvent) => {
@@ -313,6 +321,47 @@ function VideoSection({ videos }: { videos: Video[] }) {
     setIsDragging(false);
   };
 
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (touchPauseTimeoutRef.current) {
+      clearTimeout(touchPauseTimeoutRef.current);
+    }
+    setIsDragging(true);
+    setStartX(e.touches[0].clientX);
+    setDragDistance(0);
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    const diff = Math.abs(e.touches[0].clientX - startX);
+    setDragDistance(diff);
+  };
+
+  const handleTouchEnd = () => {
+    if (touchPauseTimeoutRef.current) {
+      clearTimeout(touchPauseTimeoutRef.current);
+    }
+    touchPauseTimeoutRef.current = setTimeout(() => {
+      setIsDragging(false);
+    }, 2500);
+  };
+
+  const handleScroll = () => {
+    const container = containerRef.current;
+    if (!container) return;
+    const halfWidth = container.scrollWidth / 2;
+    if (halfWidth <= 0) return;
+    if (container.scrollLeft >= halfWidth) {
+      container.scrollLeft -= halfWidth;
+    } else if (container.scrollLeft <= 0) {
+      container.scrollLeft += halfWidth;
+    }
+  };
+
+  const scrollByAmount = (amount: number) => {
+    const container = containerRef.current;
+    if (!container) return;
+    container.scrollBy({ left: amount, behavior: "smooth" });
+  };
+
   const handleVideoClick = (youtubeId: string, e: React.MouseEvent) => {
     if (dragDistance > dragThreshold) {
       e.preventDefault();
@@ -323,7 +372,27 @@ function VideoSection({ videos }: { videos: Video[] }) {
 
   return (
     <section className="pb-12 overflow-hidden">
-      <SectionHeading title="Video tư vấn pháp luật" />
+      <div className="mb-4 flex items-center justify-between gap-4 border-t border-slate-200 pt-6">
+        <h2 className="section-title">Video tư vấn pháp luật</h2>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => scrollByAmount(-340)}
+            aria-label="Xem video trước"
+            className="flex h-8 w-8 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 hover:border-primary hover:text-primary hover:bg-slate-50 transition active:scale-95 shadow-xs"
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </button>
+          <button
+            type="button"
+            onClick={() => scrollByAmount(340)}
+            aria-label="Xem video tiếp theo"
+            className="flex h-8 w-8 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 hover:border-primary hover:text-primary hover:bg-slate-50 transition active:scale-95 shadow-xs"
+          >
+            <ChevronRight className="h-4 w-4" />
+          </button>
+        </div>
+      </div>
       <div className="w-full mt-4">
         <div
           ref={containerRef}
@@ -335,8 +404,13 @@ function VideoSection({ videos }: { videos: Video[] }) {
             setIsHovered(false);
           }}
           onMouseEnter={() => setIsHovered(true)}
-          className="flex gap-5 overflow-x-auto select-none scrollbar-none cursor-grab active:cursor-grabbing py-2 px-1"
-          style={{ scrollBehavior: isDragging ? "auto" : "smooth" }}
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
+          onTouchCancel={handleTouchEnd}
+          onScroll={handleScroll}
+          className="flex gap-5 overflow-x-auto select-none scrollbar-none cursor-grab active:cursor-grabbing py-2 px-1 touch-pan-x overscroll-x-contain"
+
         >
           {marqueeVideos.map((video, index) => (
             <article
@@ -479,6 +553,7 @@ export function HomePage() {
   const thumbnailArticles = useMemo(() => remainingTopicArticles.slice(1, 4), [remainingTopicArticles]);
   const newsArticles = useMemo(() => topicArticles.slice(0, 6), [topicArticles]);
   const questionArticles = questions.data?.data ?? [];
+  const site = settingValue<{ hotline?: string; zalo?: string }>(navigation?.settings, "site", {});
 
   return (
     <>
@@ -505,7 +580,7 @@ export function HomePage() {
               <ThumbnailStrip articles={thumbnailArticles} categories={navigation.categories} />
             </div>
             <ShortArticleList articles={headlineArticles} categories={navigation.categories} />
-            <ConsultationCard />
+            <ConsultationCard hotline={site?.hotline} />
           </section>
         )}
 

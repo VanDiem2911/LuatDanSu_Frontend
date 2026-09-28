@@ -15,6 +15,8 @@ type SiteSetting = {
   logoText: string;
   logoUrl?: string;
   footerSlogan?: string;
+  zalo?: string;
+  facebook?: string;
 };
 
 type Office = {
@@ -28,7 +30,8 @@ const fallbackSite: SiteSetting = {
   hotline: "090 360 1234",
   email: "congtyluatanp.hcm@gmail.com",
   logoText: "Luật Dân Sự",
-  footerSlogan: "Hỗ trợ pháp lý toàn diện."
+  footerSlogan: "Hỗ trợ pháp lý toàn diện.",
+  zalo: "https://zalo.me/0903601234"
 };
 
 const fallbackOffices: Office[] = [
@@ -90,7 +93,7 @@ export function PublicLayout() {
 
   return (
     <div className="min-h-screen bg-[#f8fafc] selection:bg-blue-100 selection:text-blue-900">
-      <header className="sticky top-0 z-[100] w-full border-b border-slate-200 bg-white py-4">
+      <header className="sticky top-0 z-[100] w-full border-b border-slate-200/90 bg-white/95 backdrop-blur-md py-3.5 shadow-sm transition-shadow">
         <div className="container-page">
           <div className="flex flex-row items-center justify-between gap-4">
             <a
@@ -267,7 +270,7 @@ export function PublicLayout() {
           </div>
         </div>
       </footer>
-      <FloatingContact />
+      <FloatingContact site={site} />
     </div>
   );
 }

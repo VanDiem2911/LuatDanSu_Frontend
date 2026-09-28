@@ -22,7 +22,7 @@ html, body {
   min-height: 100vh;
   font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   background: #f8fafc;
-  overflow-x: hidden;
+  overflow-x: clip;
   max-width: 100%;
 }
 

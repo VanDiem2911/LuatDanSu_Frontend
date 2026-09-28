@@ -1,6 +1,6 @@
 import { FormEvent, useMemo, useState, useEffect } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Edit, Plus, Search, Trash2, X, Copy, MessageSquarePlus, FileText, Eye } from "lucide-react";
+import { Edit, Plus, Search, Trash2, X, Copy, MessageSquarePlus, FileText, Eye, AlertTriangle } from "lucide-react";
 import { useParams, useSearchParams, useNavigate, useLocation } from "react-router-dom";
 import { toast } from "sonner";
 import { createAdminResource, deleteAdminResource, listAdminResource, updateAdminResource, uploadMedia } from "../../services/cms";
@@ -239,6 +239,7 @@ export function AdminResourcePage() {
   const [search, setSearch] = useState("");
   const [editing, setEditing] = useState<Record<string, unknown> | null>(null);
   const [formValues, setFormValues] = useState<Record<string, unknown>>({});
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const [filterCategory, setFilterCategory] = useState("");
   const [filterDate, setFilterDate] = useState("");
@@ -252,7 +253,11 @@ export function AdminResourcePage() {
   const fields = useMemo(() => {
     const rawFields = fieldConfigs[resource] ?? fieldsFromSample(samples[resource] ?? {});
     if (resource === "articles") {
-      return rawFields.map((field) => {
+      let filtered = rawFields;
+      if (isBieuMau) {
+        filtered = filtered.filter((field) => field.name !== "tagSlugs");
+      }
+      return filtered.map((field) => {
         if (field.name === "categorySlug") {
           return {
             ...field,
@@ -265,7 +270,7 @@ export function AdminResourcePage() {
       });
     }
     return rawFields;
-  }, [resource, categorySlug]);
+  }, [resource, categorySlug, isBieuMau]);
 
   const modalFields = resource === "settings" ? settingFieldsFor(formValues) : fields;
 
@@ -351,6 +356,10 @@ export function AdminResourcePage() {
       setFormValues({});
       queryClient.invalidateQueries({ queryKey: ["admin-resource", resource] });
       queryClient.invalidateQueries({ queryKey: ["admin-count", resource] });
+      queryClient.invalidateQueries({ queryKey: ["articles"] });
+      queryClient.invalidateQueries({ queryKey: ["videos"] });
+      queryClient.invalidateQueries({ queryKey: ["category-page"] });
+      queryClient.invalidateQueries({ queryKey: ["navigation"] });
     },
     onError: (err: any) => {
       const serverMessage = err.response?.data?.error;
@@ -390,16 +399,22 @@ export function AdminResourcePage() {
     mutationFn: (id: string) => deleteAdminResource(resource, id),
     onSuccess: () => {
       toast.success("Đã xóa");
+      setDeletingId(null);
       queryClient.invalidateQueries({ queryKey: ["admin-resource", resource] });
       queryClient.invalidateQueries({ queryKey: ["admin-count", resource] });
+      queryClient.invalidateQueries({ queryKey: ["articles"] });
+      queryClient.invalidateQueries({ queryKey: ["videos"] });
+      queryClient.invalidateQueries({ queryKey: ["category-page"] });
+      queryClient.invalidateQueries({ queryKey: ["navigation"] });
     },
-    onError: () => toast.error("Không xóa được bản ghi")
+    onError: () => {
+      toast.error("Không xóa được bản ghi");
+      setDeletingId(null);
+    }
   });
 
   function handleDelete(id: string) {
-    if (window.confirm("Bạn có chắc chắn muốn xóa bản ghi này không?")) {
-      deleteMutation.mutate(id);
-    }
+    setDeletingId(id);
   }
 
   function openCreate() {
@@ -408,6 +423,9 @@ export function AdminResourcePage() {
     );
     if (categorySlug) {
       defaults.categorySlug = categorySlug;
+    }
+    if (isBieuMau) {
+      defaults.tagSlugs = "bieu-mau";
     }
     setEditing({});
     setFormValues(resource === "settings" ? hydrateSettingsForm(defaults) : hydrateForm(fields, defaults));
@@ -986,6 +1004,41 @@ export function AdminResourcePage() {
               </button>
             </div>
           </form>
+        </div>
+      ) : null}
+
+      {deletingId ? (
+        <div className="fixed inset-0 z-[250] flex items-center justify-center bg-slate-950/50 p-4 backdrop-blur-[2px] transition-all animate-in fade-in duration-150">
+          <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-2xl border border-slate-100 animate-in zoom-in-95 duration-150 text-center">
+            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-red-50 text-red-600 mb-4 border border-red-100">
+              <AlertTriangle className="h-7 w-7" />
+            </div>
+            <h3 className="text-lg font-bold text-slate-900">Xác nhận xóa bản ghi</h3>
+            <p className="text-sm text-slate-500 mt-2 leading-relaxed">
+              Bạn có chắc chắn muốn xóa bản ghi này không? Dữ liệu sau khi xóa sẽ không thể phục hồi.
+            </p>
+            <div className="mt-6 flex items-center justify-center gap-3">
+              <button
+                type="button"
+                onClick={() => setDeletingId(null)}
+                className="flex-1 rounded-xl border border-slate-200 bg-white py-2.5 text-sm font-bold text-slate-700 hover:bg-slate-50 transition active:scale-95 shadow-sm"
+              >
+                Hủy
+              </button>
+              <button
+                type="button"
+                disabled={deleteMutation.isPending}
+                onClick={() => {
+                  if (deletingId) {
+                    deleteMutation.mutate(deletingId);
+                  }
+                }}
+                className="flex-1 rounded-xl bg-red-600 py-2.5 text-sm font-bold text-white hover:bg-red-700 transition disabled:opacity-60 active:scale-95 shadow-sm"
+              >
+                {deleteMutation.isPending ? "Đang xóa..." : "Xác nhận xóa"}
+              </button>
+            </div>
+          </div>
         </div>
       ) : null}
     </div>

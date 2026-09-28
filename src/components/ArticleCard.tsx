@@ -1,7 +1,7 @@
 import { Calendar, ChevronRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import type { Article, Category } from "../types/api";
-import { formatDate, optimizedImageSrcSet, optimizedImageUrl } from "../utils/format";
+import { formatDate, formatExcerpt, optimizedImageSrcSet, optimizedImageUrl } from "../utils/format";
 
 type Props = {
   article: Article;
@@ -28,7 +28,7 @@ export function ArticleCard({ article, category, compact = false, priority = fal
               loading="lazy"
               sizes="80px"
               className={`h-full w-full ${
-                article.image.toLowerCase().includes("logo") ? "object-contain bg-white p-1.5" : "object-cover"
+                article.image.toLowerCase().includes("logo") ? "object-contain bg-white p-1.5" : "object-cover object-top"
               }`}
             />
           ) : null}
@@ -59,7 +59,7 @@ export function ArticleCard({ article, category, compact = false, priority = fal
               fetchPriority={priority ? "high" : undefined}
               sizes="(min-width: 1024px) 400px, (min-width: 768px) 50vw, calc(100vw - 32px)"
               className={`h-full w-full transition-transform duration-300 group-hover:scale-105 ${
-                article.image.toLowerCase().includes("logo") ? "object-contain bg-white p-3" : "object-cover"
+                article.image.toLowerCase().includes("logo") ? "object-contain bg-white p-3" : "object-cover object-top"
               }`}
             />
           ) : null}
@@ -75,7 +75,7 @@ export function ArticleCard({ article, category, compact = false, priority = fal
           <h3 className="line-clamp-2 text-xl font-extrabold leading-7 text-ink group-hover:text-primary">
             {article.title}
           </h3>
-          <p className="line-clamp-3 mt-3 text-sm leading-6 text-slate-600">{article.excerpt}</p>
+          <p className="line-clamp-3 mt-3 text-sm leading-6 text-slate-600">{formatExcerpt(article.excerpt)}</p>
           <span className="mt-4 inline-flex items-center gap-1 text-sm font-bold text-primary">
             Đọc tiếp <ChevronRight className="h-4 w-4" />
           </span>

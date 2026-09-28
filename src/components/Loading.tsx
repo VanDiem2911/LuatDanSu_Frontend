@@ -64,7 +64,7 @@ function HeroFrame() {
   return (
     <div className="grid min-h-[650px] gap-8 lg:grid-cols-[1.55fr_0.7fr_0.8fr]">
       <div>
-        <Block className="aspect-[16/7] w-full rounded-sm" />
+        <Block className="aspect-[16/9] w-full rounded-sm" />
         <div className="space-y-3 py-5">
           <Block className="h-3 w-24 rounded" />
           <Block className="h-7 w-10/12 rounded" />

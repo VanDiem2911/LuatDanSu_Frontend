@@ -94,5 +94,15 @@ export function optimizeHtmlImages(html?: string, width = 800, priorityFirst = f
     }
   });
 
-  return doc.body.innerHTML;
+}
+
+export function formatExcerpt(text?: string, fallback = ""): string {
+  if (!text) return fallback;
+  const trimmed = text.trim();
+  if (!trimmed) return fallback;
+  // If already ends with punctuation or ellipsis, return as is
+  if (/[.!?…]$/.test(trimmed)) {
+    return trimmed;
+  }
+  return `${trimmed}...`;
 }

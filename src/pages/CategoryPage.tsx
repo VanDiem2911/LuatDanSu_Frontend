@@ -12,7 +12,7 @@ import { getArticles, getCategoryPage } from "../services/cms";
 import { queryKeys } from "../services/queryKeys";
 import { ChevronRight, Play, Scale, Search, Zap } from "lucide-react";
 import type { Article, Category, NavigationPayload } from "../types/api";
-import { optimizedImageSrcSet, optimizedImageUrl } from "../utils/format";
+import { formatExcerpt, optimizedImageSrcSet, optimizedImageUrl, settingValue } from "../utils/format";
 
 const headingCopy: Record<string, { title: string; description: string }> = {
   "tin-tuc": {
@@ -53,7 +53,9 @@ function labelFor(category?: Category) {
   return category ? labels[category.slug] ?? category.name : "";
 }
 
-function ConsultationCard({ image: _image }: { image?: string }) {
+function ConsultationCard({ image: _image, hotline }: { image?: string; hotline?: string }) {
+  const phone = hotline || "090 360 1234";
+  const rawPhone = phone.replace(/\D/g, "") || "0903601234";
   return (
     <aside className="flex flex-col border border-slate-200 bg-white px-6 py-6 text-center gap-4">
       <div className="mx-auto flex h-14 w-14 items-center justify-center text-primary">
@@ -75,8 +77,8 @@ function ConsultationCard({ image: _image }: { image?: string }) {
         <Link to="/dang-ky-tu-van" className="rounded-full bg-primary py-2.5 text-xs font-black uppercase text-white shadow-md">
           Đăng ký ngay
         </Link>
-        <a href="tel:0903601234" className="rounded-full border border-slate-200 py-2 text-xs font-black text-primary hover:bg-slate-50">
-          Gọi 090 360 1234
+        <a href={`tel:${rawPhone}`} className="rounded-full border border-slate-200 py-2 text-xs font-black text-primary hover:bg-slate-50">
+          Gọi {phone}
         </a>
         <p className="mt-1 text-[0.65rem] font-black uppercase tracking-[0.16em] text-slate-600">* Hỗ trợ 24/7, bảo mật</p>
       </div>
@@ -89,19 +91,19 @@ function TopStory({ article, category }: { article: Article; category: Category 
   return (
     <article>
       <Link to={href(article)} className="group block">
-        <div className="aspect-[16/7] overflow-hidden bg-slate-100 flex items-center justify-center">
+        <div className="aspect-[16/9] overflow-hidden bg-slate-100 flex items-center justify-center rounded">
           {article.image ? (
             <img
               src={optimizedImageUrl(article.image, 800)}
               srcSet={optimizedImageSrcSet(article.image, [360, 480, 640, 800])}
               alt={article.title}
               width={800}
-              height={350}
+              height={450}
               fetchPriority="high"
               decoding="async"
               sizes="(min-width: 1024px) 590px, calc(100vw - 32px)"
               className={`h-full w-full transition group-hover:scale-[1.02] ${
-                article.image.toLowerCase().includes("logo") ? "object-contain bg-white p-3" : "object-cover"
+                article.image.toLowerCase().includes("logo") ? "object-contain bg-white p-3" : "object-cover object-top"
               }`}
             />
           ) : null}
@@ -111,7 +113,7 @@ function TopStory({ article, category }: { article: Article; category: Category 
           <h2 className="mt-1 line-clamp-2 text-[1.45rem] font-black leading-8 text-slate-950 group-hover:text-primary">
             {article.title}
           </h2>
-          <p className="mt-2 line-clamp-2 text-sm font-medium leading-6 text-slate-500">{article.excerpt}</p>
+          <p className="mt-2 line-clamp-2 text-sm font-medium leading-6 text-slate-500">{formatExcerpt(article.excerpt)}</p>
         </div>
       </Link>
     </article>
@@ -135,7 +137,7 @@ function SmallFeatureGrid({ articles, category }: { articles: Article[]; categor
                 decoding="async"
                 sizes="(min-width: 640px) 190px, calc(100vw - 32px)"
                 className={`h-full w-full transition group-hover:scale-105 ${
-                  article.image.toLowerCase().includes("logo") ? "object-contain bg-white p-2" : "object-cover"
+                  article.image.toLowerCase().includes("logo") ? "object-contain bg-white p-2" : "object-cover object-top"
                 }`}
               />
             ) : null}
@@ -166,7 +168,7 @@ function HeadlineList({ articles, category }: { articles: Article[]; category: C
 function ArticleRow({ article, category, question = false }: { article: Article; category: Category; question?: boolean }) {
   return (
     <Link to={href(article)} className="group grid gap-5 border-b border-slate-200 py-5 first:pt-0 sm:grid-cols-[230px_1fr]">
-      <div className="aspect-[16/10] overflow-hidden bg-slate-100 flex items-center justify-center">
+      <div className="aspect-[16/10] overflow-hidden bg-slate-100 flex items-center justify-center rounded">
         {article.image ? (
           <img
             src={optimizedImageUrl(article.image, 320)}
@@ -178,7 +180,7 @@ function ArticleRow({ article, category, question = false }: { article: Article;
             decoding="async"
             sizes="(min-width: 640px) 230px, calc(100vw - 32px)"
             className={`h-full w-full transition group-hover:scale-105 ${
-              article.image.toLowerCase().includes("logo") ? "object-contain bg-white p-2.5" : "object-cover"
+              article.image.toLowerCase().includes("logo") ? "object-contain bg-white p-2.5" : "object-cover object-top"
             }`}
           />
         ) : null}
@@ -188,7 +190,7 @@ function ArticleRow({ article, category, question = false }: { article: Article;
         <h2 className="mt-1 line-clamp-2 text-xl font-black leading-7 text-slate-900 group-hover:text-primary">{article.title}</h2>
         <p className="mt-2 line-clamp-3 text-sm font-medium leading-6 text-slate-500">
           {question ? <strong className="font-black text-primary">Trả lời: </strong> : null}
-          {article.excerpt}
+          {formatExcerpt(article.excerpt)}
         </p>
       </div>
     </Link>
@@ -295,11 +297,12 @@ export function CategoryPage() {
   
   const [search, setSearch] = useState("");
   const navigation = useOutletContext<NavigationPayload>();
+  const site = settingValue<{ hotline?: string; zalo?: string }>(navigation?.settings, "site", {});
   const categoryPage = useQuery({
     queryKey: queryKeys.categoryPage(categorySlug),
     queryFn: () => getCategoryPage(categorySlug),
     enabled: Boolean(categorySlug),
-    staleTime: 5 * 60 * 1000
+    staleTime: 30_000
   });
 
   useEffect(() => {
@@ -323,7 +326,7 @@ export function CategoryPage() {
     queryFn: () => getArticles({ categorySlug, page, limit: 9, sort: "publishedAt", order: "desc", search }),
     enabled: Boolean(categorySlug) && shouldLoadSeparateList,
     placeholderData: (previousData) => previousData,
-    staleTime: 5 * 60 * 1000
+    staleTime: 30_000
   });
 
   const copy = headingCopy[categorySlug];
@@ -373,7 +376,7 @@ export function CategoryPage() {
               {lead ? (
                 <TopStory article={lead} category={category} />
               ) : (
-                <div className="aspect-[16/7] w-full skeleton-block rounded mb-4" />
+                <div className="aspect-[16/9] w-full skeleton-block rounded mb-4" />
               )}
               {thumbnails.length > 0 ? (
                 <SmallFeatureGrid articles={thumbnails} category={category} />
@@ -386,7 +389,7 @@ export function CategoryPage() {
               )}
             </div>
             <HeadlineList articles={headlines} category={category} />
-            <ConsultationCard />
+            <ConsultationCard hotline={site?.hotline} />
           </section>
         ) : null}
 

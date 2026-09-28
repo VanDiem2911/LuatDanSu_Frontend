@@ -1,11 +1,29 @@
 import { HelpCircle, MessageCircle, Phone } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useNavigation } from "../hooks/useNavigation";
+import { settingValue } from "../utils/format";
 
-export function FloatingContact() {
+type Props = {
+  site?: {
+    hotline?: string;
+    zalo?: string;
+  };
+};
+
+export function FloatingContact({ site: propSite }: Props) {
+  const navigation = useNavigation();
+  const siteFromNav = settingValue<{ hotline?: string; zalo?: string }>(navigation.data?.settings, "site", {});
+  const site = propSite || siteFromNav;
+
+  const hotline = site?.hotline || "090 360 1234";
+  const rawPhone = hotline.replace(/\D/g, "") || "0903601234";
+  const zaloUrl = site?.zalo?.trim() || (rawPhone ? `https://zalo.me/${rawPhone}` : "https://zalo.me/0903601234");
+  const phoneHref = `tel:${rawPhone}`;
+
   const buttons = [
     { label: "Đặt câu hỏi ngay", icon: HelpCircle, href: "/hoi-dap", className: "bg-[#ff8022]", external: false },
-    { label: "Chat Zalo", icon: MessageCircle, href: "https://zalo.me/0903601234", className: "bg-[#0068ff]", external: true },
-    { label: "090 360 1234", icon: Phone, href: "tel:0903601234", className: "bg-[#4CAF50]", external: true }
+    { label: "Chat Zalo", icon: MessageCircle, href: zaloUrl, className: "bg-[#0068ff]", external: true },
+    { label: hotline, icon: Phone, href: phoneHref, className: "bg-[#4CAF50]", external: true }
   ];
 
   return (
