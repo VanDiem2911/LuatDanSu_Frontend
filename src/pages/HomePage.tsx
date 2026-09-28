@@ -266,7 +266,7 @@ function VideoSection({ videos }: { videos: Video[] }) {
   const [scrollLeftState, setScrollLeftState] = useState(0);
   const dragThreshold = 5;
   const [dragDistance, setDragDistance] = useState(0);
-  const touchPauseTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const touchPauseTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const marqueeVideos = [...videos, ...videos];
 
