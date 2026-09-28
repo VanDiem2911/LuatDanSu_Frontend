@@ -10,6 +10,7 @@ import { settingValue } from "../utils/format";
 type SiteSetting = {
   name: string;
   company: string;
+  description?: string;
   hotline: string;
   email: string;
   logoText: string;
@@ -27,6 +28,7 @@ type Office = {
 const fallbackSite: SiteSetting = {
   name: "Luật Dân Sự",
   company: "CÔNG TY LUẬT TNHH ANP",
+  description: "Cổng thông tin pháp lý chuyên sâu về luật dân sự, đất đai, hôn nhân gia đình, thừa kế.",
   hotline: "090 360 1234",
   email: "congtyluatanp.hcm@gmail.com",
   logoText: "Luật Dân Sự",
@@ -247,6 +249,9 @@ export function PublicLayout() {
         <div className="container-page">
           <div className="mb-6 text-center md:text-left">
             <h3 className="text-[1.25rem] font-extrabold uppercase tracking-tight text-navy">{site.company}</h3>
+            {site.description ? (
+              <p className="mt-2 max-w-2xl text-sm font-medium leading-relaxed text-slate-600 md:text-left">{site.description}</p>
+            ) : null}
             <div className="mx-auto mt-1.5 h-1 w-16 bg-blue-600 md:mx-0" />
           </div>
           <div className="mb-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">

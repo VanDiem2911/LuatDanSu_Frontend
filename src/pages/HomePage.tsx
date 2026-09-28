@@ -553,11 +553,11 @@ export function HomePage() {
   const thumbnailArticles = useMemo(() => remainingTopicArticles.slice(1, 4), [remainingTopicArticles]);
   const newsArticles = useMemo(() => topicArticles.slice(0, 6), [topicArticles]);
   const questionArticles = questions.data?.data ?? [];
-  const site = settingValue<{ hotline?: string; zalo?: string }>(navigation?.settings, "site", {});
+  const site = settingValue<{ hotline?: string; zalo?: string; description?: string }>(navigation?.settings, "site", {});
 
   return (
     <>
-      <Seo title="Luật Dân Sự - Cổng thông tin pháp luật | Luật ANP" />
+      <Seo title="Luật Dân Sự - Cổng thông tin pháp luật | Luật ANP" description={site?.description} />
       <OrganizationJsonLd />
       <main className="container-page">
         <div className="mb-12 border-b border-slate-200 pb-6 pt-10 md:pt-12">

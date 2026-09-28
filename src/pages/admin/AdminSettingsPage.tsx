@@ -407,6 +407,9 @@ export function AdminSettingsPage() {
                 placeholder="Luật Dân Sự"
                 className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs font-medium text-slate-800 outline-none focus:border-[#2563eb]"
               />
+              <p className="mt-1.5 text-[0.72rem] text-slate-500 leading-relaxed">
+                * Lưu ý: Logo trên trang web là <strong>file hình ảnh</strong>. Để đổi hình ảnh và chữ trên logo, vui lòng dùng nút <strong>"Tải ảnh logo từ máy tính"</strong> ở trên. Ô này là văn bản mô tả thay thế cho công cụ tìm kiếm Google (Alt Text).
+              </p>
             </div>
           </div>
 
@@ -507,6 +510,9 @@ export function AdminSettingsPage() {
                   placeholder="Cổng thông tin pháp lý chuyên sâu về luật dân sự, đất đai, hôn nhân gia đình..."
                   className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm text-slate-800 outline-none focus:border-[#2563eb]"
                 />
+                <p className="mt-1.5 text-[0.72rem] text-slate-500 leading-relaxed">
+                  * Vị trí hiển thị: Xuất hiện ở <strong>Chân trang (Footer)</strong> ngay dưới tên công ty, đồng thời là đoạn trích dẫn mô tả khi trang web xuất hiện trên <strong>Google Search</strong> hoặc khi chia sẻ link lên <strong>Zalo / Facebook</strong>.
+                </p>
               </div>
             </div>
           </div>
