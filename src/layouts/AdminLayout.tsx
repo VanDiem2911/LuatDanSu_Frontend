@@ -29,7 +29,7 @@ function AdminLogo() {
   const { data } = useQuery({
     queryKey: ["admin-site-logo"],
     queryFn: () => listAdminResource("settings", { limit: 10 }),
-    staleTime: 60_000
+    staleTime: 5_000
   });
   const site = data?.data?.find((s: any) => s.key === "site")?.value as any;
   const logoUrl = site?.logoUrl || "/logo.webp";

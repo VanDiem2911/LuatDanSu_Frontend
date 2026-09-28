@@ -134,7 +134,7 @@ export function AdminSettingsPage() {
     }
   }, [settingsQuery.data]);
 
-  // Handle Logo Upload
+  // Handle Logo Upload - auto-saves to DB so user doesn't need to manually click save
   async function handleLogoUpload(event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
     if (!file) return;
@@ -143,9 +143,26 @@ export function AdminSettingsPage() {
       setIsUploadingLogo(true);
       const res = await uploadMedia(file, "logo");
       if (res.url) {
-        setSite((prev) => ({ ...prev, logoUrl: res.url }));
+        const updatedSite = { ...site, logoUrl: res.url };
+        setSite(updatedSite);
         setLogoUrlInput(res.url);
-        toast.success("Tải ảnh logo lên thành công!");
+
+        // Lưu trực tiếp vào Database ngay khi upload thành công
+        await updateAdminResource("settings", "site", {
+          key: "site",
+          group: "general",
+          isPublic: true,
+          value: updatedSite
+        });
+
+        // Cập nhật tất cả các query liên quan ngay lập tức
+        await Promise.all([
+          queryClient.invalidateQueries({ queryKey: ["admin-settings"] }),
+          queryClient.invalidateQueries({ queryKey: ["admin-site-logo"] }),
+          queryClient.invalidateQueries({ queryKey: ["navigation"] })
+        ]);
+
+        toast.success("Đã tải ảnh lên và lưu logo mới thành công!");
       }
     } catch (err) {
       console.error(err);
@@ -224,6 +241,7 @@ export function AdminSettingsPage() {
     onSuccess: () => {
       toast.success("Lưu cấu hình hệ thống thành công!");
       queryClient.invalidateQueries({ queryKey: ["admin-settings"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-site-logo"] });
       queryClient.invalidateQueries({ queryKey: ["navigation"] });
     },
     onError: (err: any) => {
@@ -380,9 +398,26 @@ export function AdminSettingsPage() {
 
                 <button
                   type="button"
-                  onClick={() => {
-                    setSite((prev) => ({ ...prev, logoUrl: "/logo.webp" }));
+                  onClick={async () => {
+                    const updatedSite = { ...site, logoUrl: "/logo.webp" };
+                    setSite(updatedSite);
                     setLogoUrlInput("/logo.webp");
+                    try {
+                      await updateAdminResource("settings", "site", {
+                        key: "site",
+                        group: "general",
+                        isPublic: true,
+                        value: updatedSite
+                      });
+                      await Promise.all([
+                        queryClient.invalidateQueries({ queryKey: ["admin-settings"] }),
+                        queryClient.invalidateQueries({ queryKey: ["admin-site-logo"] }),
+                        queryClient.invalidateQueries({ queryKey: ["navigation"] })
+                      ]);
+                      toast.success("Đã khôi phục logo mặc định thành công!");
+                    } catch {
+                      toast.info("Đã đặt về logo mặc định. Nhớ bấm 'Lưu tất cả cấu hình' để lưu thay đổi.");
+                    }
                   }}
                   className="text-xs text-slate-400 hover:text-slate-600 text-center py-1 font-medium transition"
                 >
